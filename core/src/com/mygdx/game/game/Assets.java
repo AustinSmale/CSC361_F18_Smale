@@ -24,6 +24,7 @@ public class Assets implements Disposable, AssetErrorListener {
 
 	public AssetPlayer player;
 	public AssetSpringPlatform sPlatform;
+	public AssetLevelDecoration levelDecoration;
 
 	public void init(AssetManager assetManager) {
 		this.assetManager = assetManager;
@@ -85,6 +86,17 @@ public class Assets implements Disposable, AssetErrorListener {
 
 		public AssetPlayer(TextureAtlas atlas) {
 			player = atlas.findRegion("player");
+		}
+	}
+	
+	// Level Decoration Assets
+	public class AssetLevelDecoration {
+		public final AtlasRegion hillFront;
+		public final AtlasRegion hillBack;
+		
+		public AssetLevelDecoration(TextureAtlas atlas) {
+			hillFront = atlas.findRegion("Hills_1");
+			hillBack = atlas.findRegion("Hills_2");
 		}
 	}
 

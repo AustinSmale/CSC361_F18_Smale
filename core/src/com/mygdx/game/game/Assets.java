@@ -20,7 +20,6 @@ public class Assets implements Disposable, AssetErrorListener {
 
 	// Singleton Pattern: prevents instantiation from the other classes.
 	private Assets() {
-
 	}
 
 	public AssetPlayer player;
@@ -86,11 +85,11 @@ public class Assets implements Disposable, AssetErrorListener {
 			jplatform = atlas.findRegion("jungleplatform");
 		}
 	}
-	
+
 	// Player Asset, will change just a placeholder
 	public class AssetPlayer {
 		public final AtlasRegion player;
-		
+
 		public AssetPlayer(TextureAtlas atlas) {
 			player = atlas.findRegion("player");
 		}

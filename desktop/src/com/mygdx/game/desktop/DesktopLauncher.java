@@ -5,6 +5,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.mygdx.game.CSC361_F18_Smale;
+import com.mygdx.game.game.Assets;
 
 public class DesktopLauncher {
 	private static boolean rebuildAtlas = false;

@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.util.CameraHelper;
 
 public class WorldController extends InputAdapter {
@@ -34,21 +36,19 @@ public class WorldController extends InputAdapter {
 	private void initTestObjects() {
 		// Create new array for 5 sprites
 		testSprites = new Sprite[5];
-
-		// Create empty POT-sized Pixmap with 8 bit RGBA pixel data
-		int width = 32;
-		int height = 32;
-		Pixmap pixmap = createProceduralPixmap(width, height);
-
-		// Create a new texture from pixmap data
-		Texture texture = new Texture(pixmap);
-
+		
+		// create a list of texture regions 
+		Array<TextureRegion> regions = new Array<TextureRegion>();
+		regions.add(Assets.instance.player.player);
+		regions.add(Assets.instance.wplatform.wplatform);
+		regions.add(Assets.instance.jplatform.jplatform);
+		
 		// Create new sprites using the just created texture
 		for (int i = 0; i < testSprites.length; i++) {
-			Sprite spr = new Sprite(texture);
+			Sprite spr = new Sprite(regions.random());
 
 			// Define sprite size to be 1m x 1m in game world
-			spr.setSize(1, 1);
+			spr.setSize(1, 10);
 
 			// Set origin to sprite's center
 			spr.setOrigin(spr.getWidth() / 2.0f, spr.getHeight() / 2.0f);

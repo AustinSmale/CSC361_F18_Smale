@@ -3,9 +3,11 @@ package com.mygdx.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.game.Assets;
 import com.mygdx.game.game.WorldController;
 import com.mygdx.game.game.WorldRenderer;
 
@@ -20,6 +22,8 @@ public class CSC361_F18_Smale extends ApplicationAdapter {
 	public void create() {
 		// Set Libgdx log level to DEBUG
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		//load the assets
+		Assets.instance.init(new AssetManager());
 		// Initialize controller and renderer
 		worldController = new WorldController();
 		worldRenderer = new WorldRenderer(worldController);

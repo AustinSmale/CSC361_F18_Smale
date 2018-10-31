@@ -11,8 +11,8 @@ import com.mygdx.game.game.Assets;
 import com.mygdx.game.game.WorldController;
 import com.mygdx.game.game.WorldRenderer;
 
-public class CSC361_F18_Smale extends ApplicationAdapter {
-	private static final String TAG = CSC361_F18_Smale.class.getName();
+public class JumpinJeb extends ApplicationAdapter {
+	private static final String TAG = JumpinJeb.class.getName();
 
 	private WorldController worldController;
 	private WorldRenderer worldRenderer;

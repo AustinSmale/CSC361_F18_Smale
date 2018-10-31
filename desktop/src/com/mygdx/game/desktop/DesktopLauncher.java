@@ -8,7 +8,7 @@ import com.mygdx.game.CSC361_F18_Smale;
 import com.mygdx.game.game.Assets;
 
 public class DesktopLauncher {
-	private static boolean rebuildAtlas = false;
+	private static boolean rebuildAtlas = true;
 	private static boolean drawDebugOutline = false;
 
 	public static void main(String[] arg) {
@@ -19,7 +19,7 @@ public class DesktopLauncher {
 			settings.maxHeight = 1024;
 			settings.debug = drawDebugOutline;
 			// process the texture and add it to a pack
-			TexturePacker.process(settings, "assets-raw/images", "../core/assets/images", "mygame.atlas");
+			TexturePacker.process(settings, "assets-raw/images", "../core/assets/images", "jumpin-jeb.atlas");
 		}
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "My Game";

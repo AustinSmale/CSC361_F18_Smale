@@ -4,11 +4,11 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
-import com.mygdx.game.CSC361_F18_Smale;
+import com.mygdx.game.JumpinJeb;
 import com.mygdx.game.game.Assets;
 
 public class DesktopLauncher {
-	private static boolean rebuildAtlas = true;
+	private static boolean rebuildAtlas = false;
 	private static boolean drawDebugOutline = false;
 
 	public static void main(String[] arg) {
@@ -25,6 +25,6 @@ public class DesktopLauncher {
 		config.title = "My Game";
 		config.width = 300;
 		config.height = 500;
-		new LwjglApplication(new CSC361_F18_Smale(), config);
+		new LwjglApplication(new JumpinJeb(), config);
 	}
 }

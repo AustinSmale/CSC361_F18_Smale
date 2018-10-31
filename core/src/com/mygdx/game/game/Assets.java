@@ -23,8 +23,7 @@ public class Assets implements Disposable, AssetErrorListener {
 	}
 
 	public AssetPlayer player;
-	public AssetWoodPlatform wplatform;
-	public AssetJunglePlatform jplatform;
+	public AssetSpringPlatform sPlatform;
 
 	public void init(AssetManager assetManager) {
 		this.assetManager = assetManager;
@@ -49,8 +48,7 @@ public class Assets implements Disposable, AssetErrorListener {
 
 		// Create game resource objects
 		player = new AssetPlayer(atlas);
-		wplatform = new AssetWoodPlatform(atlas);
-		jplatform = new AssetJunglePlatform(atlas);
+		sPlatform = new AssetSpringPlatform(atlas);
 	}
 
 	// Disposes of the assetManager
@@ -68,21 +66,16 @@ public class Assets implements Disposable, AssetErrorListener {
 	 * ===== Game Assets Below =====
 	 */
 
-	// Wood Platform Asset
-	public class AssetWoodPlatform {
-		public final AtlasRegion wplatform;
+	// Spring Platform Asset
+	public class AssetSpringPlatform {
+		public final AtlasRegion sPlatformMid;
+		public final AtlasRegion sPlatformLeft;
+		public final AtlasRegion sPlatformRight;
 
-		public AssetWoodPlatform(TextureAtlas atlas) {
-			wplatform = atlas.findRegion("woodplatform");
-		}
-	}
-
-	// Jungle Platform
-	public class AssetJunglePlatform {
-		public final AtlasRegion jplatform;
-
-		public AssetJunglePlatform(TextureAtlas atlas) {
-			jplatform = atlas.findRegion("jungleplatform");
+		public AssetSpringPlatform(TextureAtlas atlas) {
+			sPlatformMid = atlas.findRegion("GrassMidSpring");
+			sPlatformLeft = atlas.findRegion("GrassLeftSpring");
+			sPlatformRight = atlas.findRegion("GrassRightSpring");
 		}
 	}
 

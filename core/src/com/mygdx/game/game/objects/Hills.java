@@ -14,16 +14,29 @@ public class Hills extends AbstractGameObject {
 	}
 
 	private void init() {
-		dimension.set(10, 2);
+		dimension.set(40, 20);
 		front = Assets.instance.levelDecoration.hillFront;
 		back = Assets.instance.levelDecoration.hillBack;
 
 		// Shift mountain and extend length
-		origin.x = -dimension.x * 2;
+		origin.x = -dimension.x * 1.5f;
+		origin.y = -dimension.y * 1.075f;
 	}
 
 	@Override
 	public void render(SpriteBatch batch) {
+		TextureRegion reg = null;
+		float relX = dimension.x;
+		float relY = dimension.y;
+
+		reg = back;
+		batch.draw(reg.getTexture(), origin.x + relX, position.y + origin.y + relY, origin.x, origin.y, dimension.x,
+				dimension.y, scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
+				reg.getRegionHeight(), false, false);
 		
-	}	
+		reg = front;
+		batch.draw(reg.getTexture(), origin.x + relX, position.y + origin.y + relY, origin.x, origin.y, dimension.x,
+				dimension.y, scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
+				reg.getRegionHeight(), false, false);
+	}
 }

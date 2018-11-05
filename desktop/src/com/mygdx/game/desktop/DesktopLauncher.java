@@ -8,7 +8,7 @@ import com.mygdx.game.JumpinJeb;
 import com.mygdx.game.game.Assets;
 
 public class DesktopLauncher {
-	private static boolean rebuildAtlas = true;
+	private static boolean rebuildAtlas = false;
 	private static boolean drawDebugOutline = false;
 
 	public static void main(String[] arg) {
@@ -23,8 +23,8 @@ public class DesktopLauncher {
 		}
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "My Game";
-		config.width = 300;
-		config.height = 500;
+		config.width = 420;
+		config.height = 700;
 		new LwjglApplication(new JumpinJeb(), config);
 	}
 }

@@ -50,6 +50,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		// Create game resource objects
 		player = new AssetPlayer(atlas);
 		sPlatform = new AssetSpringPlatform(atlas);
+		levelDecoration = new AssetLevelDecoration(atlas);
 	}
 
 	// Disposes of the assetManager
@@ -95,8 +96,8 @@ public class Assets implements Disposable, AssetErrorListener {
 		public final AtlasRegion hillBack;
 		
 		public AssetLevelDecoration(TextureAtlas atlas) {
-			hillFront = atlas.findRegion("Hills_1");
-			hillBack = atlas.findRegion("Hills_2");
+			hillFront = atlas.findRegion("Hills1");
+			hillBack = atlas.findRegion("Hills2");
 		}
 	}
 

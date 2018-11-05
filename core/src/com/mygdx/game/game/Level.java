@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
+import com.mygdx.game.game.objects.Hills;
 import com.mygdx.game.game.objects.SpringPlatform;
 
 public class Level {
@@ -33,6 +34,7 @@ public class Level {
 
 	// Objects
 	public Array<SpringPlatform> sPlatforms;
+	public Hills hills;
 
 	public Level(String filename) {
 		init(filename);
@@ -72,9 +74,9 @@ public class Level {
 				else if (BLOCK_TYPE.SPRING.sameColor(currentPixel)) {
 					if (lastPixel != currentPixel) {
 						obj = new SpringPlatform();
-						float heightIncreaseFactor = 0.25f;
+						float heightIncreaseFactor = 1.0f;
 						offsetHeight = -2.5f;
-						obj.position.set(pixelX, baseHeight * obj.dimension.y * heightIncreaseFactor + offsetHeight);
+						obj.position.set(pixelX, baseHeight * heightIncreaseFactor + offsetHeight);
 						sPlatforms.add((SpringPlatform)obj);
 					} 
 					else {
@@ -88,7 +90,7 @@ public class Level {
 				}
 				// Player spawn point
 				else if (BLOCK_TYPE.PLAYER_SPAWNPOINT.sameColor(currentPixel)) {
-
+					
 				}
 
 				// Unknown object/pixel color
@@ -104,12 +106,18 @@ public class Level {
 			}
 		}
 
+		// level decoration
+		hills = new Hills();
+		
 		// Free memory
 		pixmap.dispose();
 		Gdx.app.debug(TAG, "level '" + filename + "' loaded");
 	}
 
 	public void render(SpriteBatch batch) {
+		// render in the hills
+		hills.render(batch);
+		
 		// Draw jungle platforms
 		for (SpringPlatform platform : sPlatforms)
 			platform.render(batch);

@@ -17,7 +17,7 @@ public class SpringPlatform extends AbstractGameObject {
 
 	// Initialization
 	private void init() {
-		dimension.set(1.0f, 0.5f);
+		dimension.set(1.0f, 1.0f);
 		regSPlatformMid = Assets.instance.sPlatform.sPlatformMid;
 		regSPlatformLeft = Assets.instance.sPlatform.sPlatformLeft;
 		regSPlatformRight = Assets.instance.sPlatform.sPlatformRight;
@@ -61,7 +61,7 @@ public class SpringPlatform extends AbstractGameObject {
 
 		// draw right edge
 		reg = regSPlatformRight;
-		batch.draw(reg.getTexture(), position.x + relX, position.y + relY, origin.x + dimension.x / 8, origin.y,
+		batch.draw(reg.getTexture(), position.x + relX, position.y + relY, origin.x + dimension.x, origin.y,
 				dimension.x, dimension.y, scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(),
 				reg.getRegionWidth(), reg.getRegionHeight(), false, false);
 	}

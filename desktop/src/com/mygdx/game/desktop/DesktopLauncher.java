@@ -23,8 +23,8 @@ public class DesktopLauncher {
 		}
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "My Game";
-		config.width = 300;
-		config.height = 500;
+		config.width = 420;
+		config.height = 700;
 		new LwjglApplication(new JumpinJeb(), config);
 	}
 }

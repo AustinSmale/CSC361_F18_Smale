@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
 import com.mygdx.game.game.objects.Hills;
+import com.mygdx.game.game.objects.Jeb;
 import com.mygdx.game.game.objects.SpringPlatform;
 
 public class Level {
@@ -35,6 +36,7 @@ public class Level {
 	// Objects
 	public Array<SpringPlatform> sPlatforms;
 	public Hills hills;
+	public Jeb jeb;
 
 	public Level(String filename) {
 		init(filename);
@@ -77,9 +79,8 @@ public class Level {
 						float heightIncreaseFactor = 1.0f;
 						offsetHeight = -2.5f;
 						obj.position.set(pixelX, baseHeight * heightIncreaseFactor + offsetHeight);
-						sPlatforms.add((SpringPlatform)obj);
-					} 
-					else {
+						sPlatforms.add((SpringPlatform) obj);
+					} else {
 						sPlatforms.get(sPlatforms.size - 1).increaseLength(1);
 					}
 				}
@@ -90,7 +91,10 @@ public class Level {
 				}
 				// Player spawn point
 				else if (BLOCK_TYPE.PLAYER_SPAWNPOINT.sameColor(currentPixel)) {
-					
+					obj = new Jeb();
+					offsetHeight = -3.0f;
+					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
+					jeb = (Jeb) obj;
 				}
 
 				// Unknown object/pixel color
@@ -108,7 +112,7 @@ public class Level {
 
 		// level decoration
 		hills = new Hills();
-		
+
 		// Free memory
 		pixmap.dispose();
 		Gdx.app.debug(TAG, "level '" + filename + "' loaded");
@@ -117,9 +121,19 @@ public class Level {
 	public void render(SpriteBatch batch) {
 		// render in the hills
 		hills.render(batch);
-		
+
 		// Draw jungle platforms
 		for (SpringPlatform platform : sPlatforms)
 			platform.render(batch);
+
+		// draw jeb
+		jeb.render(batch);
+	}
+
+
+	public void update(float deltaTime) {
+		jeb.update(deltaTime);
+		for (SpringPlatform sp : sPlatforms)
+			sp.update(deltaTime);
 	}
 }

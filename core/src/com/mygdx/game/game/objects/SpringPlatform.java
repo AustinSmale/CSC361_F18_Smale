@@ -26,6 +26,10 @@ public class SpringPlatform extends AbstractGameObject {
 	// Sets the length of the rock
 	public void setLength(int length) {
 		this.length = length;
+
+		// Update bounding box for collision detection
+		bounds.set(0, 0, dimension.x * (length+1), dimension.y);
+
 	}
 
 	// Increases the overall length of the rock by a fixed length

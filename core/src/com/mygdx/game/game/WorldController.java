@@ -6,11 +6,10 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.Rectangle;
+import com.mygdx.game.game.objects.Jeb;
+import com.mygdx.game.game.objects.Jeb.JUMP_STATE;
+import com.mygdx.game.game.objects.SpringPlatform;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
@@ -19,7 +18,9 @@ public class WorldController extends InputAdapter {
 
 	public Level level;
 	public int score;
-
+	// bounding boxes
+	private Rectangle r1 = new Rectangle();
+	private Rectangle r2 = new Rectangle();
 	public CameraHelper cameraHelper;
 
 	public WorldController() {
@@ -36,6 +37,7 @@ public class WorldController extends InputAdapter {
 	private void initLevel() {
 		score = 0;
 		level = new Level(Constants.LEVEL_01);
+		cameraHelper.setTarget(level.jeb);
 	}
 
 	private Pixmap createProceduralPixmap(int width, int height) {
@@ -57,47 +59,49 @@ public class WorldController extends InputAdapter {
 	}
 
 	public void update(float deltaTime) {
-		handleDebugInput(deltaTime);
+
+		// TimeLeft game over.
+		if (isGameOver()) {
+			init();
+		} else {
+			handleInputJeb(deltaTime);
+		}
+
+		level.update(deltaTime);
+		testCollisions();
 		cameraHelper.update(deltaTime);
+
 	}
 
-	private void handleDebugInput(float deltaTime) {
-		if (Gdx.app.getType() != ApplicationType.Desktop)
-			return;
+	/**
+	 * Handle Jeb
+	 */
+	private void handleInputJeb(float deltaTime) {
+		if (cameraHelper.hasTarget(level.jeb)) {
+			// Player Movement
+			if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+				level.jeb.velocity.x = -level.jeb.terminalVelocity.x;
+			} else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+				level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+			} else {
+				// Execute auto-forward movement on non-desktop platform
+				if (Gdx.app.getType() != ApplicationType.Desktop) {
+					level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+				}
+			}
 
-		// Camera Controls (move)
-		float camMoveSpeed = 5 * deltaTime;
-		float camMoveSpeedAccelerationFactor = 5;
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			camMoveSpeed *= camMoveSpeedAccelerationFactor;
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
-			moveCamera(-camMoveSpeed, 0);
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
-			moveCamera(camMoveSpeed, 0);
-		if (Gdx.input.isKeyPressed(Keys.UP))
-			moveCamera(0, camMoveSpeed);
-		if (Gdx.input.isKeyPressed(Keys.DOWN))
-			moveCamera(0, -camMoveSpeed);
-		if (Gdx.input.isKeyPressed(Keys.BACKSPACE))
-			cameraHelper.setPosition(0, 0);
-
-		// Camera Controls (zoom)
-		float camZoomSpeed = 1 * deltaTime;
-		float camZoomSpeedAccelerationFactor = 5;
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			camZoomSpeed *= camZoomSpeedAccelerationFactor;
-		if (Gdx.input.isKeyPressed(Keys.COMMA))
-			cameraHelper.addZoom(camZoomSpeed);
-		if (Gdx.input.isKeyPressed(Keys.PERIOD))
-			cameraHelper.addZoom(-camZoomSpeed);
-		if (Gdx.input.isKeyPressed(Keys.SLASH))
-			cameraHelper.setZoom(1);
+			// Bunny Jump
+			if (Gdx.input.isTouched() || Gdx.input.isKeyPressed(Keys.SPACE)) {
+				level.jeb.setJumping(true);
+			} else {
+				level.jeb.setJumping(false);
+			}
+		}
 	}
 
-	private void moveCamera(float x, float y) {
+	private void moveCameraUp(float x) {
 		x += cameraHelper.getPosition().x;
-		y += cameraHelper.getPosition().y;
-		cameraHelper.setPosition(x, y);
+		cameraHelper.setPosition(x);
 	}
 
 	@Override
@@ -108,5 +112,57 @@ public class WorldController extends InputAdapter {
 			Gdx.app.debug(TAG, "Game world resetted");
 		}
 		return false;
+	}
+
+	// check if the game is over
+	// Method check if game is over.
+	public boolean isGameOver() {
+		return false;
+	}
+
+	/**
+	 * Box2D collison with platforms
+	 * 
+	 * @param rock
+	 */
+	private void onCollisionJebWithPlatform(SpringPlatform platform) {
+		Jeb jeb = level.jeb;
+		float heightDifference = Math.abs(jeb.position.y - (platform.position.y + platform.bounds.height));
+		if (heightDifference > 0.25f) {
+			boolean hitLeftEdge = jeb.position.x > (platform.position.x + platform.bounds.width / 2.0f);
+			if (hitLeftEdge) {
+				jeb.position.x = platform.position.x + platform.bounds.width;
+			} else {
+				jeb.position.x = platform.position.x - jeb.bounds.width;
+			}
+			return;
+		}
+		;
+
+		// Switch statement for jumpstate
+		switch (jeb.jumpState) {
+		case GROUNDED:
+			break;
+		case FALLING:
+		case JUMP_FALLING:
+			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+			jeb.jumpState = JUMP_STATE.GROUNDED;
+			break;
+		case JUMP_RISING:
+			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+			break;
+		}
+	}
+
+	private void testCollisions() {
+		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
+
+		// Test collision: Bunny Head <-> Rocks
+		for (SpringPlatform platform : level.sPlatforms) {
+			r2.set(platform.position.x, platform.position.y, platform.bounds.width, platform.bounds.height);
+			if (!r1.overlaps(r2))
+				continue;
+			onCollisionJebWithPlatform(platform);
+		}
 	}
 }

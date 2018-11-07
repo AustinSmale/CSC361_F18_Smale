@@ -16,7 +16,7 @@ public class CameraHelper {
 	private Sprite target;
 		
 	public CameraHelper () {
-		position = new Vector2();
+		position = new Vector2(7.5f, 7);
 		zoom = 1.0f;
 	}
 	

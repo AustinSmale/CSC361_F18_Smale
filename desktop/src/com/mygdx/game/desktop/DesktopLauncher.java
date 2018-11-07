@@ -1,11 +1,11 @@
 package com.mygdx.game.desktop;
 
+import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import com.mygdx.game.JumpinJeb;
-import com.mygdx.game.game.Assets;
 
 public class DesktopLauncher {
 	private static boolean rebuildAtlas = false;
@@ -22,7 +22,9 @@ public class DesktopLauncher {
 			TexturePacker.process(settings, "assets-raw/images", "../core/assets/images", "jumpin-jeb.atlas");
 		}
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.title = "My Game";
+		config.title = "Jumpin Jeb";
+		config.addIcon("assets-raw/icon/player-icon.png", Files.FileType.Internal);
+		config.resizable = false;
 		config.width = 420;
 		config.height = 700;
 		new LwjglApplication(new JumpinJeb(), config);

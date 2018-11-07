@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
-import com.mygdx.game.game.objects.JunglePlatform;
-import com.mygdx.game.game.objects.WoodPlatform;
+import com.mygdx.game.game.objects.Hills;
+import com.mygdx.game.game.objects.SpringPlatform;
 
 public class Level {
 	public static final String TAG = Level.class.getName();
@@ -14,9 +14,9 @@ public class Level {
 	// Colors
 	public enum BLOCK_TYPE {
 		EMPTY(0, 0, 0), // black
-		JUNGLE(0, 255, 0), // green
+		SPRING(0, 255, 0), // green
 		PLAYER_SPAWNPOINT(255, 255, 255), // white
-		WOOD(0, 0, 255); // blue
+		WINTER(0, 0, 255); // blue
 		private int color;
 
 		private BLOCK_TYPE(int r, int g, int b) {
@@ -33,8 +33,8 @@ public class Level {
 	}
 
 	// Objects
-	public Array<JunglePlatform> jPlatforms;
-	public Array<WoodPlatform> wPlatforms;
+	public Array<SpringPlatform> sPlatforms;
+	public Hills hills;
 
 	public Level(String filename) {
 		init(filename);
@@ -42,8 +42,7 @@ public class Level {
 
 	private void init(String filename) {
 		// need to initialize rock array here
-		jPlatforms = new Array<JunglePlatform>();
-		wPlatforms = new Array<WoodPlatform>();
+		sPlatforms = new Array<SpringPlatform>();
 
 		// Load image file that represents the level data
 		Pixmap pixmap = new Pixmap(Gdx.files.internal(filename));
@@ -72,25 +71,26 @@ public class Level {
 				}
 
 				// Jungle Platform
-				else if (BLOCK_TYPE.JUNGLE.sameColor(currentPixel)) {
-					obj = new JunglePlatform();
-					float heightIncreaseFactor = 0.25f;
-					offsetHeight = -2.5f;
-					obj.position.set(pixelX, baseHeight * obj.dimension.y * heightIncreaseFactor + offsetHeight);
-					jPlatforms.add((JunglePlatform) obj);
+				else if (BLOCK_TYPE.SPRING.sameColor(currentPixel)) {
+					if (lastPixel != currentPixel) {
+						obj = new SpringPlatform();
+						float heightIncreaseFactor = 1.0f;
+						offsetHeight = -2.5f;
+						obj.position.set(pixelX, baseHeight * heightIncreaseFactor + offsetHeight);
+						sPlatforms.add((SpringPlatform)obj);
+					} 
+					else {
+						sPlatforms.get(sPlatforms.size - 1).increaseLength(1);
+					}
 				}
 
-				// Wood platform
-				else if (BLOCK_TYPE.WOOD.sameColor(currentPixel)) {
-					obj = new WoodPlatform();
-					float heightIncreaseFactor = 0.25f;
-					offsetHeight = -2.5f;
-					obj.position.set(pixelX, baseHeight * obj.dimension.y * heightIncreaseFactor + offsetHeight);
-					wPlatforms.add((WoodPlatform) obj);
+				// Winter platform
+				else if (BLOCK_TYPE.WINTER.sameColor(currentPixel)) {
+					// not added yet
 				}
 				// Player spawn point
 				else if (BLOCK_TYPE.PLAYER_SPAWNPOINT.sameColor(currentPixel)) {
-
+					
 				}
 
 				// Unknown object/pixel color
@@ -106,18 +106,20 @@ public class Level {
 			}
 		}
 
+		// level decoration
+		hills = new Hills();
+		
 		// Free memory
 		pixmap.dispose();
 		Gdx.app.debug(TAG, "level '" + filename + "' loaded");
 	}
 
 	public void render(SpriteBatch batch) {
+		// render in the hills
+		hills.render(batch);
+		
 		// Draw jungle platforms
-		for (JunglePlatform platform : jPlatforms)
-			platform.render(batch);
-
-		// Draw wood platforms
-		for (WoodPlatform platform : wPlatforms)
+		for (SpringPlatform platform : sPlatforms)
 			platform.render(batch);
 	}
 }

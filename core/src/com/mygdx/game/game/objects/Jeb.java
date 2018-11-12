@@ -19,6 +19,7 @@ public class Jeb extends AbstractGameObject {
 	}
 
 	private TextureRegion regPlayer;
+	private TextureRegion jetpack;
 	public VIEW_DIRECTION viewDirection;
 	public float timeJumping;
 	public JUMP_STATE jumpState;
@@ -38,14 +39,17 @@ public class Jeb extends AbstractGameObject {
 		// Bounding box for collision detection
 		bounds.set(0, 0, dimension.x, dimension.y);
 		// Set physics values
-		terminalVelocity.set(3.0f, 4.0f);
+		terminalVelocity.set(4.0f, 5.5f);
 		friction.set(12.0f, 0.0f);
-		acceleration.set(0.0f, -25.0f);
+		acceleration.set(0.0f, -20.0f);
 		// View direction
 		viewDirection = VIEW_DIRECTION.RIGHT;
 		// Jump state
 		jumpState = JUMP_STATE.FALLING;
 		timeJumping = 0;
+		
+		// get the jetpack
+		jetpack = Assets.instance.powerUps.jetpackJeb;
 	}
 
 	/**
@@ -74,11 +78,45 @@ public class Jeb extends AbstractGameObject {
 		}
 	}
 
+	protected void updateMotionY(float deltaTime) {
+		switch (jumpState) {
+		case GROUNDED:
+			jumpState = JUMP_STATE.FALLING;
+			break;
+		case JUMP_RISING:
+			// Keep track of jump time
+			timeJumping += deltaTime;
+			// Jump time left?
+			if (timeJumping <= JUMP_TIME_MAX) {
+				// Still jumping
+				velocity.y = terminalVelocity.y;
+			}
+			break;
+		case FALLING:
+			break;
+		case JUMP_FALLING:
+			// Add delta times to track jump time
+			timeJumping += deltaTime;
+			// Jump to minimal height if jump key was pressed too short
+			if (timeJumping > 0 && timeJumping <= JUMP_TIME_MIN) {
+				// Still jumping
+				velocity.y = terminalVelocity.y;
+			}
+		}
+		super.updateMotionY(deltaTime);
+	}
+
 	/**
 	 * Render in jeb
 	 */
 	public void render(SpriteBatch batch) {
 		TextureRegion reg = null;
+		// render the jetpack if jeb has it before jeb
+//		reg = jetpack;
+//		batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
+//				scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
+//				viewDirection == VIEW_DIRECTION.LEFT, false);
+		
 		// set the region to jeb
 		reg = regPlayer;
 		batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,

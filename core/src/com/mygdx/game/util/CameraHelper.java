@@ -30,8 +30,8 @@ public class CameraHelper {
 		this.position.set(x, y);
 	}
 
-	public void setPosition(float x) {
-		this.position.set(x, position.y);
+	public void setPosition(float y) {
+		this.position.set(position.x, y);
 	}
 
 	public Vector2 getPosition() {

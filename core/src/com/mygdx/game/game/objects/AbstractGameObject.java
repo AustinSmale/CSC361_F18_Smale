@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 
 /**
  * The super class for every game object
@@ -25,6 +26,7 @@ public abstract class AbstractGameObject {
 	public Vector2 friction; // opposing force that slows down object
 	public Vector2 acceleration; // object's constant acceleration
 	public Rectangle bounds;
+	public Body body;
 
 	/**
 	 * Constructor for AbstractGameObject to set vectors
@@ -48,11 +50,17 @@ public abstract class AbstractGameObject {
 	 * @param deltaTime
 	 */
 	public void update(float deltaTime) {
-		updateMotionX(deltaTime);
-		updateMotionY(deltaTime);
-		// Move to new position
-		position.x += velocity.x * deltaTime;
-		position.y += velocity.y * deltaTime;
+		// set the body
+		if (body == null) {
+			updateMotionX(deltaTime);
+			updateMotionY(deltaTime);
+			// Move to new position
+			position.x += velocity.x * deltaTime;
+			position.y += velocity.y * deltaTime;
+		} else {
+			position.set(body.getPosition());
+			rotation = body.getAngle() * MathUtils.radiansToDegrees;
+		}
 	}
 
 	/**

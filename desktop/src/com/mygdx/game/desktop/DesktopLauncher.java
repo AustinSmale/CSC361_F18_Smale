@@ -25,7 +25,7 @@ public class DesktopLauncher {
 		config.title = "Jumpin Jeb";
 		config.addIcon("assets-raw/icon/player-icon.png", Files.FileType.Internal);
 		config.resizable = false;
-		config.width = 420;
+		config.width = 700;
 		config.height = 700;
 		new LwjglApplication(new JumpinJeb(), config);
 	}

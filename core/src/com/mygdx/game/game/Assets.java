@@ -25,6 +25,7 @@ public class Assets implements Disposable, AssetErrorListener {
 	public AssetPlayer player;
 	public AssetSpringPlatform sPlatform;
 	public AssetLevelDecoration levelDecoration;
+	public AssetPowerUps powerUps;
 
 	public void init(AssetManager assetManager) {
 		this.assetManager = assetManager;
@@ -51,6 +52,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		player = new AssetPlayer(atlas);
 		sPlatform = new AssetSpringPlatform(atlas);
 		levelDecoration = new AssetLevelDecoration(atlas);
+		powerUps = new AssetPowerUps(atlas);
 	}
 
 	// Disposes of the assetManager
@@ -87,6 +89,21 @@ public class Assets implements Disposable, AssetErrorListener {
 
 		public AssetPlayer(TextureAtlas atlas) {
 			player = atlas.findRegion("player");
+		}
+	}
+	
+	
+	public class AssetPowerUps {
+		public final AtlasRegion slow;
+		public final AtlasRegion jetpackPU;		// the power up icon
+		public final AtlasRegion jetpackJeb;	// the jet pack that goes on jeb
+		public final AtlasRegion doubleJump;
+		
+		public AssetPowerUps(TextureAtlas atlas) {
+			slow = atlas.findRegion("slow");
+			jetpackPU = atlas.findRegion("jetpackPower");
+			jetpackJeb = atlas.findRegion("jetpack");
+			doubleJump = atlas.findRegion("double");
 		}
 	}
 	

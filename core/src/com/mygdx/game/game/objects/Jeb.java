@@ -26,6 +26,8 @@ public class Jeb extends AbstractGameObject {
 	public JUMP_STATE jumpState;
 	public boolean slowUpgrade;
 	public float slowTimeLeft;
+	public boolean jetpackUpgrade;
+	public float jetpackTimeLeft;
 
 	public Jeb() {
 		init();
@@ -57,6 +59,8 @@ public class Jeb extends AbstractGameObject {
 		// power up stuff
 		slowUpgrade = false;
 		slowTimeLeft = 0;
+		jetpackUpgrade = false;
+		jetpackTimeLeft = 0;
 	}
 
 	/**
@@ -119,12 +123,12 @@ public class Jeb extends AbstractGameObject {
 	public void render(SpriteBatch batch) {
 		TextureRegion reg = null;
 		// render the jetpack if jeb has it before jeb
-		// reg = jetpack;
-		// batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y,
-		// dimension.x, dimension.y, scale.x,
-		// scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
-		// reg.getRegionHeight(),
-		// viewDirection == VIEW_DIRECTION.LEFT, false);
+		if (jetpackUpgrade) {
+			reg = jetpack;
+			batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
+					scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
+					false, false);
+		}
 
 		// set the region to jeb
 		reg = regPlayer;
@@ -139,6 +143,12 @@ public class Jeb extends AbstractGameObject {
 			slowTimeLeft = Constants.SLOW_DURATION;
 	}
 
+	public void setJetpackUpgrade(boolean pickedUp) {
+		jetpackUpgrade = pickedUp;
+		if (pickedUp)
+			jetpackTimeLeft = Constants.JETPACK_DURATION;
+	}
+
 	/**
 	 * Call the superclass's update, but also check for power ups and update their
 	 * timers
@@ -146,12 +156,23 @@ public class Jeb extends AbstractGameObject {
 	@Override
 	public void update(float deltaTime) {
 		super.update(deltaTime);
+		// update slow down time
 		if (slowTimeLeft > 0) {
 			slowTimeLeft -= deltaTime;
 			// disable to power up
 			if (slowTimeLeft < 0) {
 				slowTimeLeft = 0;
 				setSlowUpgrade(false);
+			}
+		}
+		// update jetpack time
+		if (jetpackTimeLeft > 0) {
+			jetpackTimeLeft -= deltaTime;
+			System.out.println("Time left: "+jetpackTimeLeft);
+			// disable to power up
+			if (jetpackTimeLeft < 0) {
+				jetpackTimeLeft = 0;
+				setJetpackUpgrade(false);
 			}
 		}
 	}

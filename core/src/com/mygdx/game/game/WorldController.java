@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.game.objects.Jeb;
+import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.Jeb.JUMP_STATE;
 import com.mygdx.game.game.objects.SpringPlatform;
@@ -36,7 +37,6 @@ public class WorldController extends InputAdapter implements Disposable {
 	// camera movement start time;
 	private float startCamera;
 	private float timeUntilCamera;
-	private float cameraMoveRate;
 
 	public WorldController() {
 		init();
@@ -54,8 +54,7 @@ public class WorldController extends InputAdapter implements Disposable {
 		level = new Level(Constants.LEVEL_01);
 		cameraHelper.setTarget(level.jeb);
 		startCamera = 0;
-		timeUntilCamera = 1.5f;
-		cameraMoveRate = 0.01f;
+		timeUntilCamera = 5;
 		initPhysics();
 	}
 
@@ -74,12 +73,12 @@ public class WorldController extends InputAdapter implements Disposable {
 
 		// move the camera up slowly
 		if (timeUntilCamera < startCamera)
-			if(level.jeb.slowUpgrade)
+			if (level.jeb.slowUpgrade)
 				moveCameraUp(0.005f);
 			else
-				moveCameraUp(0.01f);
+				moveCameraUp(0.02f);
 		else
-			startCamera += 0.01f;
+			startCamera += deltaTime;
 	}
 
 	/**
@@ -92,6 +91,12 @@ public class WorldController extends InputAdapter implements Disposable {
 				level.jeb.velocity.x = -level.jeb.terminalVelocity.x;
 			} else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
 				level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+			} else if (Gdx.input.isKeyPressed(Keys.SPACE) && level.jeb.jetpackUpgrade) {
+				// only if there is a jetpack upgrade
+				level.jeb.velocity.y = level.jeb.terminalVelocity.y;
+			} else if (Gdx.input.isKeyPressed(Keys.DOWN) && level.jeb.jetpackUpgrade) {
+				// only if there is a jetpack upgrade
+				level.jeb.velocity.y = -level.jeb.terminalVelocity.y;
 			} else {
 				// Execute auto-forward movement on non-desktop platform
 				if (Gdx.app.getType() != ApplicationType.Desktop) {
@@ -99,7 +104,7 @@ public class WorldController extends InputAdapter implements Disposable {
 				}
 			}
 
-			// Bunny Jump
+			// jeb Jump
 			if (Gdx.input.isTouched() || Gdx.input.isKeyPressed(Keys.SPACE)) {
 				level.jeb.setJumping(true);
 			} else {
@@ -162,6 +167,11 @@ public class WorldController extends InputAdapter implements Disposable {
 		level.jeb.setSlowUpgrade(true);
 	}
 
+	private void onCollisionJebWithJetpack(JetpackUpgrade jetpack) {
+		jetpack.collected = true;
+		level.jeb.setJetpackUpgrade(true);
+	}
+
 	private void testCollisions() {
 		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
 
@@ -173,11 +183,20 @@ public class WorldController extends InputAdapter implements Disposable {
 			onCollisionJebWithPlatform(platform);
 		}
 
+		// check if jeb hit a slow down time upgrade
 		for (SlowDownUpgrade slow : level.slow) {
 			r2.set(slow.position.x, slow.position.y, slow.bounds.width, slow.bounds.height);
 			if (!r1.overlaps(r2))
 				continue;
 			onCollisionJebWithSlow(slow);
+		}
+
+		// check if jeb hit a jetpack upgrade
+		for (JetpackUpgrade jetpack : level.jetpack) {
+			r2.set(jetpack.position.x, jetpack.position.y, jetpack.bounds.width, jetpack.bounds.height);
+			if (!r1.overlaps(r2))
+				continue;
+			onCollisionJebWithJetpack(jetpack);
 		}
 	}
 

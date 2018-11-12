@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
 import com.mygdx.game.game.objects.Hills;
 import com.mygdx.game.game.objects.Jeb;
+import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
 
@@ -21,7 +22,7 @@ public class Level {
 		WINTER(0, 0, 255), // blue
 		JETPACK(255, 0, 255), // purple
 		DOUBLE(255, 0, 255), // yellow
-		SLOW(255, 0, 255); // red
+		SLOW(255, 0, 0); // red
 		private int color;
 
 		private BLOCK_TYPE(int r, int g, int b) {
@@ -42,6 +43,7 @@ public class Level {
 	public Hills hills;
 	public Jeb jeb;
 	public Array<SlowDownUpgrade> slow;
+	public Array<JetpackUpgrade> jetpack;
 
 	public Level(String filename) {
 		init(filename);
@@ -51,6 +53,7 @@ public class Level {
 		// need to initialize rock array here
 		sPlatforms = new Array<SpringPlatform>();
 		slow = new Array<SlowDownUpgrade>();
+		jetpack = new Array<JetpackUpgrade>();
 
 		// Load image file that represents the level data
 		Pixmap pixmap = new Pixmap(Gdx.files.internal(filename));
@@ -104,11 +107,20 @@ public class Level {
 					jeb = (Jeb) obj;
 				}
 
+				// Slow down time upgrade
 				else if (BLOCK_TYPE.SLOW.sameColor(currentPixel)) {
 					obj = new SlowDownUpgrade();
 					offsetHeight = -2.4f;
 					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
 					slow.add((SlowDownUpgrade) obj);
+				}
+				
+				// jetpack upgrade
+				else if (BLOCK_TYPE.JETPACK.sameColor(currentPixel)) {
+					obj = new JetpackUpgrade();
+					offsetHeight = -2.4f;
+					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
+					jetpack.add((JetpackUpgrade) obj);
 				}
 
 				// Unknown object/pixel color
@@ -145,6 +157,11 @@ public class Level {
 			slowDown.render(batch);
 		}
 
+		// draw jet pack upgrades
+		for (JetpackUpgrade jet : jetpack) {
+			jet.render(batch);
+		}
+		
 		// draw jeb
 		jeb.render(batch);
 

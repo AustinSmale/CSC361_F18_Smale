@@ -3,6 +3,7 @@ package com.mygdx.game.game.objects;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.game.Assets;
+import com.mygdx.game.util.Constants;
 
 public class Jeb extends AbstractGameObject {
 	public static final String TAG = Jeb.class.getName();
@@ -23,6 +24,8 @@ public class Jeb extends AbstractGameObject {
 	public VIEW_DIRECTION viewDirection;
 	public float timeJumping;
 	public JUMP_STATE jumpState;
+	public boolean slowUpgrade;
+	public float slowTimeLeft;
 
 	public Jeb() {
 		init();
@@ -47,9 +50,13 @@ public class Jeb extends AbstractGameObject {
 		// Jump state
 		jumpState = JUMP_STATE.FALLING;
 		timeJumping = 0;
-		
+
 		// get the jetpack
 		jetpack = Assets.instance.powerUps.jetpackJeb;
+
+		// power up stuff
+		slowUpgrade = false;
+		slowTimeLeft = 0;
 	}
 
 	/**
@@ -112,15 +119,40 @@ public class Jeb extends AbstractGameObject {
 	public void render(SpriteBatch batch) {
 		TextureRegion reg = null;
 		// render the jetpack if jeb has it before jeb
-//		reg = jetpack;
-//		batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
-//				scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
-//				viewDirection == VIEW_DIRECTION.LEFT, false);
-		
+		// reg = jetpack;
+		// batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y,
+		// dimension.x, dimension.y, scale.x,
+		// scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
+		// reg.getRegionHeight(),
+		// viewDirection == VIEW_DIRECTION.LEFT, false);
+
 		// set the region to jeb
 		reg = regPlayer;
 		batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
 				scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
 				viewDirection == VIEW_DIRECTION.LEFT, false);
+	}
+
+	public void setSlowUpgrade(boolean pickedUp) {
+		slowUpgrade = pickedUp;
+		if (pickedUp)
+			slowTimeLeft = Constants.SLOW_DURATION;
+	}
+
+	/**
+	 * Call the superclass's update, but also check for power ups and update their
+	 * timers
+	 */
+	@Override
+	public void update(float deltaTime) {
+		super.update(deltaTime);
+		if (slowTimeLeft > 0) {
+			slowTimeLeft -= deltaTime;
+			// disable to power up
+			if (slowTimeLeft < 0) {
+				slowTimeLeft = 0;
+				setSlowUpgrade(false);
+			}
+		}
 	}
 }

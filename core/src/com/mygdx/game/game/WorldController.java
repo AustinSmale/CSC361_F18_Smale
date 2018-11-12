@@ -22,7 +22,7 @@ import com.mygdx.game.game.objects.SpringPlatform;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
-public class WorldController extends InputAdapter implements Disposable{
+public class WorldController extends InputAdapter implements Disposable {
 	private static final String TAG = WorldController.class.getName();
 
 	public Level level;
@@ -32,7 +32,7 @@ public class WorldController extends InputAdapter implements Disposable{
 	private Rectangle r2 = new Rectangle();
 	public CameraHelper cameraHelper;
 	public World b2World;
-	
+
 	// camera movement start time;
 	private float startCamera;
 	private float timeUntilCamera;
@@ -73,10 +73,13 @@ public class WorldController extends InputAdapter implements Disposable{
 		cameraHelper.update(deltaTime);
 
 		// move the camera up slowly
-		if(timeUntilCamera < startCamera)
-			moveCameraUp(0.01f);
+		if (timeUntilCamera < startCamera)
+			if(level.jeb.slowUpgrade)
+				moveCameraUp(0.005f);
+			else
+				moveCameraUp(0.01f);
 		else
-			startCamera  += 0.01f;
+			startCamera += 0.01f;
 	}
 
 	/**
@@ -156,8 +159,9 @@ public class WorldController extends InputAdapter implements Disposable{
 
 	private void onCollisionJebWithSlow(SlowDownUpgrade slow) {
 		slow.collected = true;
+		level.jeb.setSlowUpgrade(true);
 	}
-	
+
 	private void testCollisions() {
 		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
 
@@ -167,6 +171,13 @@ public class WorldController extends InputAdapter implements Disposable{
 			if (!r1.overlaps(r2))
 				continue;
 			onCollisionJebWithPlatform(platform);
+		}
+
+		for (SlowDownUpgrade slow : level.slow) {
+			r2.set(slow.position.x, slow.position.y, slow.bounds.width, slow.bounds.height);
+			if (!r1.overlaps(r2))
+				continue;
+			onCollisionJebWithSlow(slow);
 		}
 	}
 
@@ -196,10 +207,10 @@ public class WorldController extends InputAdapter implements Disposable{
 			polygonShape.dispose();
 		}
 	}
-	
+
 	@Override
 	public void dispose() {
-		if(b2World != null) {
+		if (b2World != null) {
 			b2World.dispose();
 		}
 	}

@@ -5,6 +5,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.Assets;
 
+/**
+ * The platforms that jeb is allowed to land on
+ * 
+ * @author Austin
+ *
+ */
 public class SpringPlatform extends AbstractGameObject {
 	private TextureRegion regSPlatformMid;
 	private int length;

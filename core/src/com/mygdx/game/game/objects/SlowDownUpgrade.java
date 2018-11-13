@@ -4,6 +4,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.game.Assets;
 
+/**
+ * Slow down the rate at which the camera pans up
+ * 
+ * @author Austin
+ *
+ */
 public class SlowDownUpgrade extends AbstractGameObject {
 
 	private TextureRegion upgrade;
@@ -13,12 +19,18 @@ public class SlowDownUpgrade extends AbstractGameObject {
 		init();
 	}
 
+	/**
+	 * Initialize the power up
+	 */
 	private void init() {
 		dimension.set(1, 1);
 		upgrade = Assets.instance.powerUps.slow;
 		collected = false;
 	}
 
+	/**
+	 * Render in the upgrade
+	 */
 	@Override
 	public void render(SpriteBatch batch) {
 		TextureRegion reg;

@@ -5,17 +5,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.game.Assets;
 
 /**
- * Give Jeb a jet pack to fly around with for 5 seconds
- * 
+ * Allows Jeb to double jump
  * @author Austin
  *
  */
-public class JetpackUpgrade extends AbstractGameObject {
-
+public class DoubleJumpUpgrade extends AbstractGameObject {
 	private TextureRegion upgrade;
 	public boolean collected;
 
-	public JetpackUpgrade() {
+	public DoubleJumpUpgrade() {
 		init();
 	}
 
@@ -24,7 +22,7 @@ public class JetpackUpgrade extends AbstractGameObject {
 	 */
 	private void init() {
 		dimension.set(1, 1);
-		upgrade = Assets.instance.powerUps.jetpackPU;
+		upgrade = Assets.instance.powerUps.doubleJump;
 		collected = false;
 	}
 

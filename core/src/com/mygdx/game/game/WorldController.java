@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.game.game.objects.DoubleJumpUpgrade;
 import com.mygdx.game.game.objects.Jeb;
 import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
@@ -42,6 +43,9 @@ public class WorldController extends InputAdapter implements Disposable {
 		init();
 	}
 
+	/**
+	 * Initialize the world and level
+	 */
 	private void init() {
 		Gdx.input.setInputProcessor(this);
 		cameraHelper = new CameraHelper();
@@ -58,6 +62,11 @@ public class WorldController extends InputAdapter implements Disposable {
 		initPhysics();
 	}
 
+	/**
+	 * Update the world
+	 * 
+	 * @param deltaTime
+	 */
 	public void update(float deltaTime) {
 
 		// TimeLeft game over.
@@ -92,11 +101,11 @@ public class WorldController extends InputAdapter implements Disposable {
 			} else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
 				level.jeb.velocity.x = level.jeb.terminalVelocity.x;
 			} else if (Gdx.input.isKeyPressed(Keys.SPACE) && level.jeb.jetpackUpgrade) {
-				// only if there is a jetpack upgrade
-				level.jeb.velocity.y = level.jeb.terminalVelocity.y;
+				// only if there is a jet pack upgrade
+				level.jeb.velocity.y = level.jeb.terminalVelocity.y * 3;
 			} else if (Gdx.input.isKeyPressed(Keys.DOWN) && level.jeb.jetpackUpgrade) {
-				// only if there is a jetpack upgrade
-				level.jeb.velocity.y = -level.jeb.terminalVelocity.y;
+				// only if there is a jet pack upgrade
+				level.jeb.velocity.y = -level.jeb.terminalVelocity.y * 3;
 			} else {
 				// Execute auto-forward movement on non-desktop platform
 				if (Gdx.app.getType() != ApplicationType.Desktop) {
@@ -113,11 +122,19 @@ public class WorldController extends InputAdapter implements Disposable {
 		}
 	}
 
+	/**
+	 * Allows for the camera to pan up
+	 * 
+	 * @param y
+	 */
 	private void moveCameraUp(float y) {
 		y += cameraHelper.getPosition().y;
 		cameraHelper.setPosition(y);
 	}
 
+	/**
+	 * Reset the game if R is pressed
+	 */
 	@Override
 	public boolean keyUp(int keycode) {
 		// Reset game world
@@ -162,6 +179,11 @@ public class WorldController extends InputAdapter implements Disposable {
 		}
 	}
 
+	/**
+	 * Collision detection for each object in the game below
+	 * 
+	 * @param slow
+	 */
 	private void onCollisionJebWithSlow(SlowDownUpgrade slow) {
 		slow.collected = true;
 		level.jeb.setSlowUpgrade(true);
@@ -172,6 +194,14 @@ public class WorldController extends InputAdapter implements Disposable {
 		level.jeb.setJetpackUpgrade(true);
 	}
 
+	private void onCollisionJebWithDoubleJump(DoubleJumpUpgrade jump) {
+		jump.collected = true;
+		level.jeb.setDoubleJumpUpgrade(true);
+	}
+
+	/**
+	 * Check to see if jeb is in contact with any of the game objects
+	 */
 	private void testCollisions() {
 		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
 
@@ -197,6 +227,14 @@ public class WorldController extends InputAdapter implements Disposable {
 			if (!r1.overlaps(r2))
 				continue;
 			onCollisionJebWithJetpack(jetpack);
+		}
+
+		// check if jeb hit a double jump upgrade
+		for (DoubleJumpUpgrade jump : level.doubles) {
+			r2.set(jump.position.x, jump.position.y, jump.bounds.width, jump.bounds.height);
+			if (!r1.overlaps(r2))
+				continue;
+			onCollisionJebWithDoubleJump(jump);
 		}
 	}
 

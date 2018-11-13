@@ -92,7 +92,15 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 	}
 	
-	
+	/**
+	 * All the power ups in the game
+	 * 1: Slow Down Time
+	 * 2: Jetpack
+	 * 3: Double Jump
+	 * 
+	 * @author Austin
+	 *
+	 */
 	public class AssetPowerUps {
 		public final AtlasRegion slow;
 		public final AtlasRegion jetpackPU;		// the power up icon

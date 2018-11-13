@@ -9,7 +9,7 @@ public class Jeb extends AbstractGameObject {
 	public static final String TAG = Jeb.class.getName();
 	private final float JUMP_TIME_MAX = 0.3f;
 	private final float JUMP_TIME_MIN = 0.1f;
-	private final float JUMP_TIME_OFFSET_FLYING = JUMP_TIME_MAX - 0.018f;
+	private final float JUMP_TIME_OFFSET_FLYING = JUMP_TIME_MAX - 0.2f;
 
 	public enum VIEW_DIRECTION {
 		LEFT, RIGHT
@@ -28,6 +28,7 @@ public class Jeb extends AbstractGameObject {
 	public float slowTimeLeft;
 	public boolean jetpackUpgrade;
 	public float jetpackTimeLeft;
+	public boolean doubleJump;
 
 	public Jeb() {
 		init();
@@ -61,6 +62,7 @@ public class Jeb extends AbstractGameObject {
 		slowTimeLeft = 0;
 		jetpackUpgrade = false;
 		jetpackTimeLeft = 0;
+		doubleJump = false;
 	}
 
 	/**
@@ -82,9 +84,16 @@ public class Jeb extends AbstractGameObject {
 		case JUMP_RISING: // Rising in the air
 			if (!jumpKeyPressed)
 				jumpState = JUMP_STATE.JUMP_FALLING;
+			if(jetpackUpgrade)
+				jumpState = JUMP_STATE.JUMP_RISING;
 			break;
 		case FALLING:// Falling down
 		case JUMP_FALLING: // Falling down after jump
+			if (jumpKeyPressed && doubleJump) {
+				timeJumping = JUMP_TIME_OFFSET_FLYING;
+				jumpState = JUMP_STATE.JUMP_RISING;
+				setDoubleJumpUpgrade(false);
+			}
 			break;
 		}
 	}
@@ -95,7 +104,7 @@ public class Jeb extends AbstractGameObject {
 			jumpState = JUMP_STATE.FALLING;
 			break;
 		case JUMP_RISING:
-			// Keep track of jump time
+			// Keep track of jump time only if no jet pack is active
 			timeJumping += deltaTime;
 			// Jump time left?
 			if (timeJumping <= JUMP_TIME_MAX) {
@@ -148,6 +157,10 @@ public class Jeb extends AbstractGameObject {
 		if (pickedUp)
 			jetpackTimeLeft = Constants.JETPACK_DURATION;
 	}
+	
+	public void setDoubleJumpUpgrade(boolean pickedUp) {
+		doubleJump = pickedUp;
+	}
 
 	/**
 	 * Call the superclass's update, but also check for power ups and update their
@@ -168,7 +181,6 @@ public class Jeb extends AbstractGameObject {
 		// update jetpack time
 		if (jetpackTimeLeft > 0) {
 			jetpackTimeLeft -= deltaTime;
-			System.out.println("Time left: "+jetpackTimeLeft);
 			// disable to power up
 			if (jetpackTimeLeft < 0) {
 				jetpackTimeLeft = 0;

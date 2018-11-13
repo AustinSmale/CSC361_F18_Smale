@@ -5,6 +5,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.game.Assets;
 
+/**
+ * Draw the hills in the background of the game
+ * 
+ * @author Austin
+ *
+ */
 public class Hills extends AbstractGameObject {
 	private TextureRegion front;
 	private TextureRegion back;
@@ -13,6 +19,9 @@ public class Hills extends AbstractGameObject {
 		init();
 	}
 
+	/**
+	 * Initialize the hills
+	 */
 	private void init() {
 		dimension.set(40, 20);
 		front = Assets.instance.levelDecoration.hillFront;
@@ -23,6 +32,9 @@ public class Hills extends AbstractGameObject {
 		origin.y = -dimension.y * 1.075f;
 	}
 
+	/**
+	 * Render them in the correct positions
+	 */
 	@Override
 	public void render(SpriteBatch batch) {
 		TextureRegion reg = null;
@@ -33,7 +45,7 @@ public class Hills extends AbstractGameObject {
 		batch.draw(reg.getTexture(), origin.x + relX, position.y + origin.y + relY, origin.x, origin.y, dimension.x,
 				dimension.y, scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
 				reg.getRegionHeight(), false, false);
-		
+
 		reg = front;
 		batch.draw(reg.getTexture(), origin.x + relX, position.y + origin.y + relY, origin.x, origin.y, dimension.x,
 				dimension.y, scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),

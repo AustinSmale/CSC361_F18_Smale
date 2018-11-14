@@ -2,6 +2,10 @@ package com.mygdx.game.game.objects;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.Assets;
 
@@ -11,7 +15,7 @@ import com.mygdx.game.game.Assets;
  * @author Austin
  *
  */
-public class SpringPlatform extends AbstractGameObject {
+public class SpringPlatform extends AbstractGameObject{
 	private TextureRegion regSPlatformMid;
 	private int length;
 
@@ -59,5 +63,4 @@ public class SpringPlatform extends AbstractGameObject {
 			relX += dimension.x;
 		}
 	}
-
 }

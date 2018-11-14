@@ -2,10 +2,15 @@ package com.mygdx.game.game.objects;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.game.game.Assets;
 import com.mygdx.game.util.Constants;
 
-public class Jeb extends AbstractGameObject {
+public class Jeb extends AbstractGameObject implements ContactListener {
 	public static final String TAG = Jeb.class.getName();
 	private final float JUMP_TIME_MAX = 0.3f;
 	private final float JUMP_TIME_MIN = 0.1f;
@@ -16,7 +21,7 @@ public class Jeb extends AbstractGameObject {
 	}
 
 	public enum JUMP_STATE {
-		GROUNDED, FALLING, JUMP_RISING, JUMP_FALLING
+		GROUNDED, JUMP
 	}
 
 	private TextureRegion regPlayer;
@@ -29,6 +34,7 @@ public class Jeb extends AbstractGameObject {
 	public boolean jetpackUpgrade;
 	public float jetpackTimeLeft;
 	public boolean doubleJump;
+	public boolean hittingEdge;
 
 	public Jeb() {
 		init();
@@ -45,13 +51,11 @@ public class Jeb extends AbstractGameObject {
 		// Bounding box for collision detection
 		bounds.set(0, 0, dimension.x, dimension.y);
 		// Set physics values
-		terminalVelocity.set(4.0f, 5.5f);
-		friction.set(12.0f, 0.0f);
-		acceleration.set(0.0f, -20.0f);
+		terminalVelocity.set(4.0f, 7.5f);
 		// View direction
-		viewDirection = VIEW_DIRECTION.RIGHT;
+		viewDirection = VIEW_DIRECTION.LEFT;
 		// Jump state
-		jumpState = JUMP_STATE.FALLING;
+		jumpState = JUMP_STATE.GROUNDED;
 		timeJumping = 0;
 
 		// get the jetpack
@@ -63,6 +67,9 @@ public class Jeb extends AbstractGameObject {
 		jetpackUpgrade = false;
 		jetpackTimeLeft = 0;
 		doubleJump = false;
+
+		// edge detection
+		hittingEdge = false;
 	}
 
 	/**
@@ -73,57 +80,11 @@ public class Jeb extends AbstractGameObject {
 	 *            whether the key was pressed or not
 	 */
 	public void setJumping(boolean jumpKeyPressed) {
-		switch (jumpState) {
-		case GROUNDED: // Character is standing on a platform
-			if (jumpKeyPressed) {
-				// Start counting jump time from the beginning
-				timeJumping = 0;
-				jumpState = JUMP_STATE.JUMP_RISING;
-			}
-			break;
-		case JUMP_RISING: // Rising in the air
-			if (!jumpKeyPressed)
-				jumpState = JUMP_STATE.JUMP_FALLING;
-			if(jetpackUpgrade)
-				jumpState = JUMP_STATE.JUMP_RISING;
-			break;
-		case FALLING:// Falling down
-		case JUMP_FALLING: // Falling down after jump
-			if (jumpKeyPressed && doubleJump) {
-				timeJumping = JUMP_TIME_OFFSET_FLYING;
-				jumpState = JUMP_STATE.JUMP_RISING;
-				setDoubleJumpUpgrade(false);
-			}
-			break;
+		// you can jump if you are not jumping or have dobule jump
+		if (jumpKeyPressed && (jumpState != JUMP_STATE.JUMP || doubleJump)) {
+			body.setLinearVelocity(body.getLinearVelocity().x, terminalVelocity.y);
+			jumpState = JUMP_STATE.JUMP;
 		}
-	}
-
-	protected void updateMotionY(float deltaTime) {
-		switch (jumpState) {
-		case GROUNDED:
-			jumpState = JUMP_STATE.FALLING;
-			break;
-		case JUMP_RISING:
-			// Keep track of jump time only if no jet pack is active
-			timeJumping += deltaTime;
-			// Jump time left?
-			if (timeJumping <= JUMP_TIME_MAX) {
-				// Still jumping
-				velocity.y = terminalVelocity.y;
-			}
-			break;
-		case FALLING:
-			break;
-		case JUMP_FALLING:
-			// Add delta times to track jump time
-			timeJumping += deltaTime;
-			// Jump to minimal height if jump key was pressed too short
-			if (timeJumping > 0 && timeJumping <= JUMP_TIME_MIN) {
-				// Still jumping
-				velocity.y = terminalVelocity.y;
-			}
-		}
-		super.updateMotionY(deltaTime);
 	}
 
 	/**
@@ -157,7 +118,7 @@ public class Jeb extends AbstractGameObject {
 		if (pickedUp)
 			jetpackTimeLeft = Constants.JETPACK_DURATION;
 	}
-	
+
 	public void setDoubleJumpUpgrade(boolean pickedUp) {
 		doubleJump = pickedUp;
 	}
@@ -187,5 +148,44 @@ public class Jeb extends AbstractGameObject {
 				setJetpackUpgrade(false);
 			}
 		}
+	}
+
+	/**
+	 * Jeb touches a platform
+	 */
+	@Override
+	public void beginContact(Contact contact) {
+		// the platform
+		Fixture a = contact.getFixtureA();
+		// jeb
+		Fixture b = contact.getFixtureB();
+
+		// check if jeb is standing on top of a platform
+		if (b.getBody().getPosition().y - a.getBody().getPosition().y >= 0.89f) {
+			System.out.println("grounded");
+			jumpState = JUMP_STATE.GROUNDED;
+			hittingEdge = false;
+		}
+
+		// check if jeb is hitting the left or right edge of a platform, move him down
+		else if (b.getBody().getPosition().y - a.getBody().getPosition().y <= 0.89f
+				&& b.getBody().getPosition().y - a.getBody().getPosition().y >= -0.89f) {
+			hittingEdge = true;
+		}
+		else {
+			hittingEdge = false;
+		}
+	}
+
+	@Override
+	public void endContact(Contact contact) {
+	}
+
+	@Override
+	public void preSolve(Contact contact, Manifold oldManifold) {
+	}
+
+	@Override
+	public void postSolve(Contact contact, ContactImpulse impulse) {
 	}
 }

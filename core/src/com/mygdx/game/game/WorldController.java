@@ -50,6 +50,7 @@ public class WorldController extends InputAdapter implements Disposable {
 		Gdx.input.setInputProcessor(this);
 		cameraHelper = new CameraHelper();
 		initLevel();
+		b2World.setContactListener(level.jeb);
 	}
 
 	// Initializes the level
@@ -79,7 +80,8 @@ public class WorldController extends InputAdapter implements Disposable {
 		level.update(deltaTime);
 		testCollisions();
 		cameraHelper.update(deltaTime);
-
+		b2World.step(deltaTime, 8, 3);
+		
 		// move the camera up slowly
 		if (timeUntilCamera < startCamera)
 			if (level.jeb.slowUpgrade)
@@ -96,20 +98,20 @@ public class WorldController extends InputAdapter implements Disposable {
 	private void handleInputJeb(float deltaTime) {
 		if (cameraHelper.hasTarget(level.jeb)) {
 			// Player Movement
-			if (Gdx.input.isKeyPressed(Keys.LEFT)) {
-				level.jeb.velocity.x = -level.jeb.terminalVelocity.x;
-			} else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
-				level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+			if (Gdx.input.isKeyPressed(Keys.LEFT) && !level.jeb.hittingEdge) {
+				level.jeb.body.setLinearVelocity(-level.jeb.terminalVelocity.x, level.jeb.body.getLinearVelocity().y);
+			} else if (Gdx.input.isKeyPressed(Keys.RIGHT) && !level.jeb.hittingEdge) {
+				level.jeb.body.setLinearVelocity(level.jeb.terminalVelocity.x, level.jeb.body.getLinearVelocity().y);
 			} else if (Gdx.input.isKeyPressed(Keys.SPACE) && level.jeb.jetpackUpgrade) {
 				// only if there is a jet pack upgrade
-				level.jeb.velocity.y = level.jeb.terminalVelocity.y * 3;
+				level.jeb.body.setLinearVelocity(level.jeb.body.getLinearVelocity().x, level.jeb.terminalVelocity.y*1.5f);
 			} else if (Gdx.input.isKeyPressed(Keys.DOWN) && level.jeb.jetpackUpgrade) {
 				// only if there is a jet pack upgrade
-				level.jeb.velocity.y = -level.jeb.terminalVelocity.y * 3;
+				level.jeb.body.setLinearVelocity(level.jeb.body.getLinearVelocity().x, -level.jeb.terminalVelocity.y*0.5f);
 			} else {
 				// Execute auto-forward movement on non-desktop platform
 				if (Gdx.app.getType() != ApplicationType.Desktop) {
-					level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+					level.jeb.body.getLinearVelocity().x = level.jeb.terminalVelocity.x;
 				}
 			}
 
@@ -142,6 +144,12 @@ public class WorldController extends InputAdapter implements Disposable {
 			init();
 			Gdx.app.debug(TAG, "Game world resetted");
 		}
+		else if(keycode == Keys.LEFT) {
+			level.jeb.body.setLinearVelocity(0, 0);
+		}
+		else if(keycode == Keys.RIGHT) {
+			level.jeb.body.setLinearVelocity(0, 0);
+		}
 		return false;
 	}
 
@@ -159,24 +167,24 @@ public class WorldController extends InputAdapter implements Disposable {
 	private void onCollisionJebWithPlatform(SpringPlatform platform) {
 		Jeb jeb = level.jeb;
 		float heightDifference = Math.abs(jeb.position.y - (platform.position.y + platform.bounds.height));
-		if (heightDifference > 0.15f) {
+		if (heightDifference > 0.05f) {
 			return;
 		}
 
 		// Switch statement for jumpstate
-		switch (jeb.jumpState) {
-		case GROUNDED:
-			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
-			break;
-		case FALLING:
-		case JUMP_FALLING:
-			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
-			jeb.jumpState = JUMP_STATE.GROUNDED;
-			break;
-		case JUMP_RISING:
-			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
-			break;
-		}
+//		switch (jeb.jumpState) {
+//		case GROUNDED:
+//			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+//			break;
+//		case FALLING:
+//		case JUMP_FALLING:
+//			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+//			jeb.jumpState = JUMP_STATE.GROUNDED;
+//			break;
+//		case JUMP_RISING:
+//			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+//			break;
+//		}
 	}
 
 	/**
@@ -250,7 +258,7 @@ public class WorldController extends InputAdapter implements Disposable {
 
 		for (SpringPlatform platform : level.sPlatforms) {
 			BodyDef bodyDef = new BodyDef();
-			bodyDef.type = BodyType.KinematicBody;
+			bodyDef.type = BodyType.StaticBody;
 			bodyDef.position.set(platform.position);
 			Body body = b2World.createBody(bodyDef);
 			platform.body = body;
@@ -263,6 +271,21 @@ public class WorldController extends InputAdapter implements Disposable {
 			body.createFixture(fixtureDef);
 			polygonShape.dispose();
 		}
+		
+		// jeb box
+		BodyDef jeb = new BodyDef();
+		jeb.type = BodyType.DynamicBody;
+		jeb.position.set(level.jeb.position);
+		Body body = b2World.createBody(jeb);
+		level.jeb.body = body;
+		PolygonShape polygonShape = new PolygonShape();
+		origin.x = level.jeb.bounds.width / 2.0f;
+		origin.y = level.jeb.bounds.height / 2.0f;
+		polygonShape.setAsBox(level.jeb.bounds.width / 2.5f, level.jeb.bounds.height / 2.5f, origin, 0);
+		FixtureDef fixtureDef = new FixtureDef();
+		fixtureDef.shape = polygonShape;
+		body.createFixture(fixtureDef);
+		polygonShape.dispose();
 	}
 
 	@Override

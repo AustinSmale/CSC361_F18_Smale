@@ -9,7 +9,7 @@ import com.mygdx.game.JumpinJeb;
 
 public class DesktopLauncher {
 	private static boolean rebuildAtlas = false;
-	private static boolean drawDebugOutline = false;
+	private static boolean drawDebugOutline = true;
 
 	public static void main(String[] arg) {
 		// if you need to rebuild the atlas settings

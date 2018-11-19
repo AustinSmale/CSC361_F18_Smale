@@ -12,7 +12,7 @@ public class WorldRenderer implements Disposable {
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
 	private WorldController worldController;
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private Box2DDebugRenderer debug;
 	
 	public WorldRenderer(WorldController worldController) {

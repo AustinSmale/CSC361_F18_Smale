@@ -160,34 +160,6 @@ public class WorldController extends InputAdapter implements Disposable {
 	}
 
 	/**
-	 * Box2D collision with platforms
-	 * 
-	 * @param rock
-	 */
-	private void onCollisionJebWithPlatform(SpringPlatform platform) {
-		Jeb jeb = level.jeb;
-		float heightDifference = Math.abs(jeb.position.y - (platform.position.y + platform.bounds.height));
-		if (heightDifference > 0.05f) {
-			return;
-		}
-
-		// Switch statement for jumpstate
-//		switch (jeb.jumpState) {
-//		case GROUNDED:
-//			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
-//			break;
-//		case FALLING:
-//		case JUMP_FALLING:
-//			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
-//			jeb.jumpState = JUMP_STATE.GROUNDED;
-//			break;
-//		case JUMP_RISING:
-//			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
-//			break;
-//		}
-	}
-
-	/**
 	 * Collision detection for each object in the game below
 	 * 
 	 * @param slow
@@ -212,15 +184,6 @@ public class WorldController extends InputAdapter implements Disposable {
 	 */
 	private void testCollisions() {
 		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
-
-		// Test collision: Jeb <-> Platforms
-		for (SpringPlatform platform : level.sPlatforms) {
-			r2.set(platform.position.x, platform.position.y, platform.bounds.width, platform.bounds.height);
-			if (!r1.overlaps(r2))
-				continue;
-			onCollisionJebWithPlatform(platform);
-		}
-
 		// check if jeb hit a slow down time upgrade
 		for (SlowDownUpgrade slow : level.slow) {
 			r2.set(slow.position.x, slow.position.y, slow.bounds.width, slow.bounds.height);

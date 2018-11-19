@@ -75,7 +75,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 
 		// jumping
 		stillJumping = false;
-		
+
 		// score
 		maxHeight = 0;
 	}
@@ -99,7 +99,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 			stillJumping = false;
 		}
 		// double jump
-		if(!stillJumping && jumpKeyPressed && doubleJump) {
+		if (!stillJumping && jumpKeyPressed && doubleJump) {
 			body.setLinearVelocity(body.getLinearVelocity().x, terminalVelocity.y);
 			setDoubleJumpUpgrade(false);
 		}
@@ -167,8 +167,8 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 			}
 		}
 		// get the highest point reached to be used as the score
-		if(maxHeight < (int) (position.y+.585f)) {
-			maxHeight = (int) (position.y+.585f);
+		if (maxHeight < (int) (position.y + .585f)) {
+			maxHeight = (int) (position.y + .585f);
 			System.out.println(maxHeight);
 		}
 	}
@@ -183,15 +183,18 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		// jeb
 		Fixture b = contact.getFixtureB();
 
-		// check if jeb is standing on top of a platform
-		if (b.getBody().getPosition().y - a.getBody().getPosition().y >= 0.89f) {
-			jumpState = JUMP_STATE.GROUNDED;
-		}
+		// it is a platform
+		if (!a.isSensor()) {
+			// check if jeb is standing on top of a platform
+			if (b.getBody().getPosition().y - a.getBody().getPosition().y >= 0.89f) {
+				jumpState = JUMP_STATE.GROUNDED;
+			}
 
-		// check if jeb is hitting the left or right edge of a platform, move him down
-		else if (b.getBody().getPosition().y - a.getBody().getPosition().y <= 0.89f
-				&& b.getBody().getPosition().y - a.getBody().getPosition().y >= -0.89f) {
-			hittingEdge = true;
+			// check if jeb is hitting the left or right edge of a platform, move him down
+			else if (b.getBody().getPosition().y - a.getBody().getPosition().y <= 0.89f
+					&& b.getBody().getPosition().y - a.getBody().getPosition().y >= -0.89f) {
+				hittingEdge = true;
+			}
 		}
 	}
 

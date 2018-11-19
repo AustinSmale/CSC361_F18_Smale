@@ -25,6 +25,8 @@ public class SlowDownUpgrade extends AbstractGameObject {
 	private void init() {
 		dimension.set(1, 1);
 		upgrade = Assets.instance.powerUps.slow;
+		// Update bounding box for collision detection
+		bounds.set(0, 0, dimension.x, dimension.y);	
 		collected = false;
 	}
 

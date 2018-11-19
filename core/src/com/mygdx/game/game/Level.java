@@ -43,9 +43,9 @@ public class Level {
 	public Array<SpringPlatform> sPlatforms;
 	public Hills hills;
 	public Jeb jeb;
-	public Array<SlowDownUpgrade> slow;
-	public Array<JetpackUpgrade> jetpack;
-	public Array<DoubleJumpUpgrade> doubles;
+	public static Array<SlowDownUpgrade> slow;
+	public static Array<JetpackUpgrade> jetpack;
+	public static Array<DoubleJumpUpgrade> doubles;
 
 	public Level(String filename) {
 		init(filename);

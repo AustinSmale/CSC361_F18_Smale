@@ -25,6 +25,7 @@ public class JetpackUpgrade extends AbstractGameObject {
 	private void init() {
 		dimension.set(1, 1);
 		upgrade = Assets.instance.powerUps.jetpackPU;
+		bounds.set(0, 0, dimension.x, dimension.y);
 		collected = false;
 	}
 

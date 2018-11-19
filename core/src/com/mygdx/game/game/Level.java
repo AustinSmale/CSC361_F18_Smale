@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
 import com.mygdx.game.game.objects.Hills;
+import com.mygdx.game.game.objects.Jeb;
+import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
 
 public class Level {
@@ -16,7 +18,10 @@ public class Level {
 		EMPTY(0, 0, 0), // black
 		SPRING(0, 255, 0), // green
 		PLAYER_SPAWNPOINT(255, 255, 255), // white
-		WINTER(0, 0, 255); // blue
+		WINTER(0, 0, 255), // blue
+		JETPACK(255, 0, 255), // purple
+		DOUBLE(255, 0, 255), // yellow
+		SLOW(255, 0, 255); // red
 		private int color;
 
 		private BLOCK_TYPE(int r, int g, int b) {
@@ -35,6 +40,8 @@ public class Level {
 	// Objects
 	public Array<SpringPlatform> sPlatforms;
 	public Hills hills;
+	public Jeb jeb;
+	public Array<SlowDownUpgrade> slow;
 
 	public Level(String filename) {
 		init(filename);
@@ -43,6 +50,7 @@ public class Level {
 	private void init(String filename) {
 		// need to initialize rock array here
 		sPlatforms = new Array<SpringPlatform>();
+		slow = new Array<SlowDownUpgrade>();
 
 		// Load image file that represents the level data
 		Pixmap pixmap = new Pixmap(Gdx.files.internal(filename));
@@ -77,9 +85,9 @@ public class Level {
 						float heightIncreaseFactor = 1.0f;
 						offsetHeight = -2.5f;
 						obj.position.set(pixelX, baseHeight * heightIncreaseFactor + offsetHeight);
-						sPlatforms.add((SpringPlatform)obj);
-					} 
-					else {
+						sPlatforms.add((SpringPlatform) obj);
+						sPlatforms.get(sPlatforms.size - 1).increaseLength(1);
+					} else {
 						sPlatforms.get(sPlatforms.size - 1).increaseLength(1);
 					}
 				}
@@ -90,7 +98,17 @@ public class Level {
 				}
 				// Player spawn point
 				else if (BLOCK_TYPE.PLAYER_SPAWNPOINT.sameColor(currentPixel)) {
-					
+					obj = new Jeb();
+					offsetHeight = -2.4f;
+					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
+					jeb = (Jeb) obj;
+				}
+
+				else if (BLOCK_TYPE.SLOW.sameColor(currentPixel)) {
+					obj = new SlowDownUpgrade();
+					offsetHeight = -2.4f;
+					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
+					slow.add((SlowDownUpgrade) obj);
 				}
 
 				// Unknown object/pixel color
@@ -108,7 +126,7 @@ public class Level {
 
 		// level decoration
 		hills = new Hills();
-		
+
 		// Free memory
 		pixmap.dispose();
 		Gdx.app.debug(TAG, "level '" + filename + "' loaded");
@@ -117,9 +135,24 @@ public class Level {
 	public void render(SpriteBatch batch) {
 		// render in the hills
 		hills.render(batch);
-		
+
 		// Draw jungle platforms
 		for (SpringPlatform platform : sPlatforms)
 			platform.render(batch);
+
+		// draw slow down time upgrades
+		for (SlowDownUpgrade slowDown : slow) {
+			slowDown.render(batch);
+		}
+
+		// draw jeb
+		jeb.render(batch);
+
+	}
+
+	public void update(float deltaTime) {
+		jeb.update(deltaTime);
+		for (SpringPlatform sp : sPlatforms)
+			sp.update(deltaTime);
 	}
 }

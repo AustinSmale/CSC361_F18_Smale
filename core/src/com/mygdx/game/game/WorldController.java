@@ -6,21 +6,37 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.game.game.objects.Jeb;
+import com.mygdx.game.game.objects.SlowDownUpgrade;
+import com.mygdx.game.game.objects.Jeb.JUMP_STATE;
+import com.mygdx.game.game.objects.SpringPlatform;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
-public class WorldController extends InputAdapter {
+public class WorldController extends InputAdapter implements Disposable{
 	private static final String TAG = WorldController.class.getName();
 
 	public Level level;
 	public int score;
-
+	// bounding boxes
+	private Rectangle r1 = new Rectangle();
+	private Rectangle r2 = new Rectangle();
 	public CameraHelper cameraHelper;
+	public World b2World;
+	
+	// camera movement start time;
+	private float startCamera;
+	private float timeUntilCamera;
+	private float cameraMoveRate;
 
 	public WorldController() {
 		init();
@@ -36,68 +52,62 @@ public class WorldController extends InputAdapter {
 	private void initLevel() {
 		score = 0;
 		level = new Level(Constants.LEVEL_01);
-	}
-
-	private Pixmap createProceduralPixmap(int width, int height) {
-		Pixmap pixmap = new Pixmap(width, height, Format.RGBA8888);
-
-		// Fill square with red color at 50% opacity
-		pixmap.setColor(1, 0, 0, 0.5f);
-		pixmap.fill();
-
-		// Draw a yellow-colored X shape on square
-		pixmap.setColor(1, 1, 0, 1);
-		pixmap.drawLine(0, 0, width, height);
-		pixmap.drawLine(width, 0, 0, height);
-
-		// Draw a cyan-colored border around square
-		pixmap.setColor(0, 1, 1, 1);
-		pixmap.drawRectangle(0, 0, width, height);
-		return pixmap;
+		cameraHelper.setTarget(level.jeb);
+		startCamera = 0;
+		timeUntilCamera = 1.5f;
+		cameraMoveRate = 0.01f;
+		initPhysics();
 	}
 
 	public void update(float deltaTime) {
-		handleDebugInput(deltaTime);
+
+		// TimeLeft game over.
+		if (isGameOver()) {
+			init();
+		} else {
+			handleInputJeb(deltaTime);
+		}
+
+		level.update(deltaTime);
+		testCollisions();
 		cameraHelper.update(deltaTime);
+
+		// move the camera up slowly
+		if(timeUntilCamera < startCamera)
+			moveCameraUp(0.01f);
+		else
+			startCamera  += 0.01f;
 	}
 
-	private void handleDebugInput(float deltaTime) {
-		if (Gdx.app.getType() != ApplicationType.Desktop)
-			return;
+	/**
+	 * Handle Jeb
+	 */
+	private void handleInputJeb(float deltaTime) {
+		if (cameraHelper.hasTarget(level.jeb)) {
+			// Player Movement
+			if (Gdx.input.isKeyPressed(Keys.LEFT)) {
+				level.jeb.velocity.x = -level.jeb.terminalVelocity.x;
+			} else if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
+				level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+			} else {
+				// Execute auto-forward movement on non-desktop platform
+				if (Gdx.app.getType() != ApplicationType.Desktop) {
+					level.jeb.velocity.x = level.jeb.terminalVelocity.x;
+				}
+			}
 
-		// Camera Controls (move)
-		float camMoveSpeed = 5 * deltaTime;
-		float camMoveSpeedAccelerationFactor = 5;
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			camMoveSpeed *= camMoveSpeedAccelerationFactor;
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
-			moveCamera(-camMoveSpeed, 0);
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
-			moveCamera(camMoveSpeed, 0);
-		if (Gdx.input.isKeyPressed(Keys.UP))
-			moveCamera(0, camMoveSpeed);
-		if (Gdx.input.isKeyPressed(Keys.DOWN))
-			moveCamera(0, -camMoveSpeed);
-		if (Gdx.input.isKeyPressed(Keys.BACKSPACE))
-			cameraHelper.setPosition(0, 0);
-
-		// Camera Controls (zoom)
-		float camZoomSpeed = 1 * deltaTime;
-		float camZoomSpeedAccelerationFactor = 5;
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			camZoomSpeed *= camZoomSpeedAccelerationFactor;
-		if (Gdx.input.isKeyPressed(Keys.COMMA))
-			cameraHelper.addZoom(camZoomSpeed);
-		if (Gdx.input.isKeyPressed(Keys.PERIOD))
-			cameraHelper.addZoom(-camZoomSpeed);
-		if (Gdx.input.isKeyPressed(Keys.SLASH))
-			cameraHelper.setZoom(1);
+			// Bunny Jump
+			if (Gdx.input.isTouched() || Gdx.input.isKeyPressed(Keys.SPACE)) {
+				level.jeb.setJumping(true);
+			} else {
+				level.jeb.setJumping(false);
+			}
+		}
 	}
 
-	private void moveCamera(float x, float y) {
-		x += cameraHelper.getPosition().x;
+	private void moveCameraUp(float y) {
 		y += cameraHelper.getPosition().y;
-		cameraHelper.setPosition(x, y);
+		cameraHelper.setPosition(y);
 	}
 
 	@Override
@@ -108,5 +118,89 @@ public class WorldController extends InputAdapter {
 			Gdx.app.debug(TAG, "Game world resetted");
 		}
 		return false;
+	}
+
+	// check if the game is over
+	// Method check if game is over.
+	public boolean isGameOver() {
+		return false;
+	}
+
+	/**
+	 * Box2D collision with platforms
+	 * 
+	 * @param rock
+	 */
+	private void onCollisionJebWithPlatform(SpringPlatform platform) {
+		Jeb jeb = level.jeb;
+		float heightDifference = Math.abs(jeb.position.y - (platform.position.y + platform.bounds.height));
+		if (heightDifference > 0.15f) {
+			return;
+		}
+
+		// Switch statement for jumpstate
+		switch (jeb.jumpState) {
+		case GROUNDED:
+			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+			break;
+		case FALLING:
+		case JUMP_FALLING:
+			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+			jeb.jumpState = JUMP_STATE.GROUNDED;
+			break;
+		case JUMP_RISING:
+			jeb.position.y = platform.position.y + platform.bounds.height + platform.origin.y;
+			break;
+		}
+	}
+
+	private void onCollisionJebWithSlow(SlowDownUpgrade slow) {
+		slow.collected = true;
+	}
+	
+	private void testCollisions() {
+		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
+
+		// Test collision: Jeb <-> Platforms
+		for (SpringPlatform platform : level.sPlatforms) {
+			r2.set(platform.position.x, platform.position.y, platform.bounds.width, platform.bounds.height);
+			if (!r1.overlaps(r2))
+				continue;
+			onCollisionJebWithPlatform(platform);
+		}
+	}
+
+	// box2d stuff below
+	// Initializes the physics for the in-game objects
+	private void initPhysics() {
+		if (b2World != null)
+			b2World.dispose();
+		b2World = new World(new Vector2(0, -9.81f), true);
+
+		// Rocks
+		Vector2 origin = new Vector2();
+
+		for (SpringPlatform platform : level.sPlatforms) {
+			BodyDef bodyDef = new BodyDef();
+			bodyDef.type = BodyType.KinematicBody;
+			bodyDef.position.set(platform.position);
+			Body body = b2World.createBody(bodyDef);
+			platform.body = body;
+			PolygonShape polygonShape = new PolygonShape();
+			origin.x = platform.bounds.width / 2.0f;
+			origin.y = platform.bounds.height / 2.0f;
+			polygonShape.setAsBox(platform.bounds.width / 2.0f, platform.bounds.height / 2.0f, origin, 0);
+			FixtureDef fixtureDef = new FixtureDef();
+			fixtureDef.shape = polygonShape;
+			body.createFixture(fixtureDef);
+			polygonShape.dispose();
+		}
+	}
+	
+	@Override
+	public void dispose() {
+		if(b2World != null) {
+			b2World.dispose();
+		}
 	}
 }

@@ -5,8 +5,10 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
+import com.mygdx.game.game.objects.DoubleJumpUpgrade;
 import com.mygdx.game.game.objects.Hills;
 import com.mygdx.game.game.objects.Jeb;
+import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
 
@@ -20,8 +22,8 @@ public class Level {
 		PLAYER_SPAWNPOINT(255, 255, 255), // white
 		WINTER(0, 0, 255), // blue
 		JETPACK(255, 0, 255), // purple
-		DOUBLE(255, 0, 255), // yellow
-		SLOW(255, 0, 255); // red
+		DOUBLE(255, 255, 0), // yellow
+		SLOW(255, 0, 0); // red
 		private int color;
 
 		private BLOCK_TYPE(int r, int g, int b) {
@@ -42,6 +44,8 @@ public class Level {
 	public Hills hills;
 	public Jeb jeb;
 	public Array<SlowDownUpgrade> slow;
+	public Array<JetpackUpgrade> jetpack;
+	public Array<DoubleJumpUpgrade> doubles;
 
 	public Level(String filename) {
 		init(filename);
@@ -51,6 +55,8 @@ public class Level {
 		// need to initialize rock array here
 		sPlatforms = new Array<SpringPlatform>();
 		slow = new Array<SlowDownUpgrade>();
+		jetpack = new Array<JetpackUpgrade>();
+		doubles = new Array<DoubleJumpUpgrade>();
 
 		// Load image file that represents the level data
 		Pixmap pixmap = new Pixmap(Gdx.files.internal(filename));
@@ -104,11 +110,28 @@ public class Level {
 					jeb = (Jeb) obj;
 				}
 
+				// Slow down time upgrade
 				else if (BLOCK_TYPE.SLOW.sameColor(currentPixel)) {
 					obj = new SlowDownUpgrade();
 					offsetHeight = -2.4f;
 					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
 					slow.add((SlowDownUpgrade) obj);
+				}
+
+				// jetpack upgrade
+				else if (BLOCK_TYPE.JETPACK.sameColor(currentPixel)) {
+					obj = new JetpackUpgrade();
+					offsetHeight = -2.4f;
+					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
+					jetpack.add((JetpackUpgrade) obj);
+				}
+
+				// double jump upgrade
+				else if (BLOCK_TYPE.DOUBLE.sameColor(currentPixel)) {
+					obj = new DoubleJumpUpgrade();
+					offsetHeight = -2.4f;
+					obj.position.set(pixelX, baseHeight * obj.dimension.y + offsetHeight);
+					doubles.add((DoubleJumpUpgrade) obj);
 				}
 
 				// Unknown object/pixel color
@@ -145,6 +168,16 @@ public class Level {
 			slowDown.render(batch);
 		}
 
+		// draw jet pack upgrades
+		for (JetpackUpgrade jet : jetpack) {
+			jet.render(batch);
+		}
+
+		// draw jet pack upgrades
+		for (DoubleJumpUpgrade jump : doubles) {
+			jump.render(batch);
+		}
+
 		// draw jeb
 		jeb.render(batch);
 
@@ -154,5 +187,17 @@ public class Level {
 		jeb.update(deltaTime);
 		for (SpringPlatform sp : sPlatforms)
 			sp.update(deltaTime);
+
+		for (SlowDownUpgrade slowDown : slow) {
+			slowDown.update(deltaTime);
+		}
+
+		for (JetpackUpgrade jet : jetpack) {
+			jet.update(deltaTime);
+		}
+
+		for (DoubleJumpUpgrade jump : doubles) {
+			jump.update(deltaTime);
+		}
 	}
 }

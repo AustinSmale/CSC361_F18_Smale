@@ -5,17 +5,17 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.game.Assets;
 
 /**
- * Slow down the rate at which the camera pans up
+ * Give Jeb a jet pack to fly around with for 5 seconds
  * 
  * @author Austin
  *
  */
-public class SlowDownUpgrade extends AbstractGameObject {
+public class JetpackUpgrade extends AbstractGameObject {
 
 	private TextureRegion upgrade;
 	public boolean collected;
 
-	public SlowDownUpgrade() {
+	public JetpackUpgrade() {
 		init();
 	}
 
@@ -24,7 +24,7 @@ public class SlowDownUpgrade extends AbstractGameObject {
 	 */
 	private void init() {
 		dimension.set(1, 1);
-		upgrade = Assets.instance.powerUps.slow;
+		upgrade = Assets.instance.powerUps.jetpackPU;
 		collected = false;
 	}
 
@@ -42,5 +42,4 @@ public class SlowDownUpgrade extends AbstractGameObject {
 					false, false);
 		}
 	}
-
 }

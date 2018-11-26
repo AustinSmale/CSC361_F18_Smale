@@ -76,7 +76,6 @@ public class WorldController extends InputAdapter implements Disposable {
 		}
 
 		level.update(deltaTime);
-		testCollisions();
 		cameraHelper.update(deltaTime);
 		b2World.step(deltaTime, 8, 3);
 
@@ -150,9 +149,9 @@ public class WorldController extends InputAdapter implements Disposable {
 			init();
 			Gdx.app.debug(TAG, "Game world resetted");
 		} else if (keycode == Keys.LEFT) {
-			level.jeb.body.setLinearVelocity(0, 0);
+			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
 		} else if (keycode == Keys.RIGHT) {
-			level.jeb.body.setLinearVelocity(0, 0);
+			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
 		}
 		return false;
 	}
@@ -161,56 +160,6 @@ public class WorldController extends InputAdapter implements Disposable {
 	// Method check if game is over.
 	public boolean isGameOver() {
 		return gameOver;
-	}
-
-	/**
-	 * Collision detection for each object in the game below
-	 * 
-	 * @param slow
-	 */
-	private void onCollisionJebWithSlow(SlowDownUpgrade slow) {
-		slow.collected = true;
-		level.jeb.setSlowUpgrade(true);
-	}
-
-	private void onCollisionJebWithJetpack(JetpackUpgrade jetpack) {
-		jetpack.collected = true;
-		level.jeb.setJetpackUpgrade(true);
-	}
-
-	private void onCollisionJebWithDoubleJump(DoubleJumpUpgrade jump) {
-		jump.collected = true;
-		level.jeb.setDoubleJumpUpgrade(true);
-	}
-
-	/**
-	 * Check to see if jeb is in contact with any of the game objects
-	 */
-	private void testCollisions() {
-		r1.set(level.jeb.position.x, level.jeb.position.y, level.jeb.bounds.width, level.jeb.bounds.height);
-		// check if jeb hit a slow down time upgrade
-		for (SlowDownUpgrade slow : level.slow) {
-			r2.set(slow.position.x, slow.position.y, slow.bounds.width, slow.bounds.height);
-			if (!r1.overlaps(r2))
-				continue;
-			onCollisionJebWithSlow(slow);
-		}
-
-		// check if jeb hit a jetpack upgrade
-		for (JetpackUpgrade jetpack : level.jetpack) {
-			r2.set(jetpack.position.x, jetpack.position.y, jetpack.bounds.width, jetpack.bounds.height);
-			if (!r1.overlaps(r2))
-				continue;
-			onCollisionJebWithJetpack(jetpack);
-		}
-
-		// check if jeb hit a double jump upgrade
-		for (DoubleJumpUpgrade jump : level.doubles) {
-			r2.set(jump.position.x, jump.position.y, jump.bounds.width, jump.bounds.height);
-			if (!r1.overlaps(r2))
-				continue;
-			onCollisionJebWithDoubleJump(jump);
-		}
 	}
 
 	// box2d stuff below
@@ -247,6 +196,7 @@ public class WorldController extends InputAdapter implements Disposable {
 			upgrade.position.set(slow.position);
 			Body body = b2World.createBody(upgrade);
 			slow.body = body;
+			slow.body.setUserData(slow);
 			PolygonShape polygonShape = new PolygonShape();
 			origin.x = slow.bounds.width / 2.0f;
 			origin.y = slow.bounds.height / 2.0f;
@@ -264,6 +214,7 @@ public class WorldController extends InputAdapter implements Disposable {
 			upgrade.position.set(doubles.position);
 			Body body = b2World.createBody(upgrade);
 			doubles.body = body;
+			doubles.body.setUserData(doubles);
 			PolygonShape polygonShape = new PolygonShape();
 			origin.x = doubles.bounds.width / 2.0f;
 			origin.y = doubles.bounds.height / 2.0f;
@@ -281,6 +232,7 @@ public class WorldController extends InputAdapter implements Disposable {
 			upgrade.position.set(jet.position);
 			Body body = b2World.createBody(upgrade);
 			jet.body = body;
+			jet.body.setUserData(jet);
 			PolygonShape polygonShape = new PolygonShape();
 			origin.x = jet.bounds.width / 2.0f;
 			origin.y = jet.bounds.height / 2.0f;

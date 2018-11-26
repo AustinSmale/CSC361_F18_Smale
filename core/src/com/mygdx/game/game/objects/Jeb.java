@@ -12,9 +12,7 @@ import com.mygdx.game.util.Constants;
 
 public class Jeb extends AbstractGameObject implements ContactListener {
 	public static final String TAG = Jeb.class.getName();
-	private final float JUMP_TIME_MAX = 0.3f;
-	private final float JUMP_TIME_MIN = 0.1f;
-	private final float JUMP_TIME_OFFSET_FLYING = JUMP_TIME_MAX - 0.2f;
+
 
 	public enum VIEW_DIRECTION {
 		LEFT, RIGHT
@@ -178,7 +176,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	 */
 	@Override
 	public void beginContact(Contact contact) {
-		// the platform
+		// the object
 		Fixture a = contact.getFixtureA();
 		// jeb
 		Fixture b = contact.getFixtureB();
@@ -194,6 +192,30 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 			else if (b.getBody().getPosition().y - a.getBody().getPosition().y <= 0.89f
 					&& b.getBody().getPosition().y - a.getBody().getPosition().y >= -0.89f) {
 				hittingEdge = true;
+			}
+		}
+		// contatcs a upgrade
+		else {
+			if(a.getBody().getUserData().getClass() == SlowDownUpgrade.class) {
+				SlowDownUpgrade upg = (SlowDownUpgrade) a.getBody().getUserData();
+				if(!upg.collected) {
+					upg.collected = true;
+					setSlowUpgrade(true);
+				}
+			}
+			else if (a.getBody().getUserData().getClass() == JetpackUpgrade.class) {
+				JetpackUpgrade upg = (JetpackUpgrade) a.getBody().getUserData();
+				if(!upg.collected) {
+					upg.collected = true;
+					setJetpackUpgrade(true);
+				}
+			}
+			else if (a.getBody().getUserData().getClass() == DoubleJumpUpgrade.class) {
+				DoubleJumpUpgrade upg = (DoubleJumpUpgrade) a.getBody().getUserData();
+				if(!upg.collected) {
+					upg.collected = true;
+					setDoubleJumpUpgrade(true);
+				}
 			}
 		}
 	}

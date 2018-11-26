@@ -26,6 +26,7 @@ public class DoubleJumpUpgrade extends AbstractGameObject {
 		upgrade = Assets.instance.powerUps.doubleJump;
 		bounds.set(0, 0, dimension.x, dimension.y);
 		collected = false;
+		
 	}
 
 	/**

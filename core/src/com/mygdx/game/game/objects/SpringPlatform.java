@@ -2,13 +2,21 @@ package com.mygdx.game.game.objects;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.Contact;
+import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.Assets;
 
-public class SpringPlatform extends AbstractGameObject {
+/**
+ * The platforms that jeb is allowed to land on
+ * 
+ * @author Austin
+ *
+ */
+public class SpringPlatform extends AbstractGameObject{
 	private TextureRegion regSPlatformMid;
-	private TextureRegion regSPlatformLeft;
-	private TextureRegion regSPlatformRight;
 	private int length;
 
 	public SpringPlatform() {
@@ -19,13 +27,16 @@ public class SpringPlatform extends AbstractGameObject {
 	private void init() {
 		dimension.set(1.0f, 1.0f);
 		regSPlatformMid = Assets.instance.sPlatform.sPlatformMid;
-		regSPlatformLeft = Assets.instance.sPlatform.sPlatformLeft;
-		regSPlatformRight = Assets.instance.sPlatform.sPlatformRight;
+
 	}
 
 	// Sets the length of the rock
 	public void setLength(int length) {
 		this.length = length;
+
+		// Update bounding box for collision detection
+		bounds.set(0, 0, dimension.x * length, dimension.y);
+
 	}
 
 	// Increases the overall length of the rock by a fixed length
@@ -42,13 +53,6 @@ public class SpringPlatform extends AbstractGameObject {
 		float relX = 0;
 		float relY = 0;
 
-		// draw left edge
-		reg = regSPlatformLeft;
-		relX -= dimension.x;
-		batch.draw(reg.getTexture(), position.x + relX, position.y + relY, origin.x, origin.y, dimension.x, dimension.y,
-				scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(),
-				reg.getRegionHeight(), false, false);
-
 		// draw the middle
 		reg = regSPlatformMid;
 		relX = 0;
@@ -58,12 +62,5 @@ public class SpringPlatform extends AbstractGameObject {
 					reg.getRegionHeight(), false, false);
 			relX += dimension.x;
 		}
-
-		// draw right edge
-		reg = regSPlatformRight;
-		batch.draw(reg.getTexture(), position.x + relX, position.y + relY, origin.x + dimension.x, origin.y,
-				dimension.x, dimension.y, scale.x, scale.y, rotation, reg.getRegionX(), reg.getRegionY(),
-				reg.getRegionWidth(), reg.getRegionHeight(), false, false);
 	}
-
 }

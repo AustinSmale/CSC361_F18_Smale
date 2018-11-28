@@ -4,109 +4,266 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.game.objects.DoubleJumpUpgrade;
+import com.mygdx.game.game.objects.JetpackUpgrade;
+import com.mygdx.game.game.objects.SlowDownUpgrade;
+import com.mygdx.game.game.objects.SpringPlatform;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
-public class WorldController extends InputAdapter {
+public class WorldController extends InputAdapter implements Disposable {
 	private static final String TAG = WorldController.class.getName();
 
 	public Level level;
 	public int score;
-
+	private boolean gameOver;
+	// bounding boxes
+	private Rectangle r1 = new Rectangle();
+	private Rectangle r2 = new Rectangle();
 	public CameraHelper cameraHelper;
+	public World b2World;
+
+	// camera movement start time;
+	private float startCamera;
+	private float timeUntilCamera;
 
 	public WorldController() {
 		init();
 	}
 
+	/**
+	 * Initialize the world and level
+	 */
 	private void init() {
 		Gdx.input.setInputProcessor(this);
 		cameraHelper = new CameraHelper();
 		initLevel();
+		b2World.setContactListener(level.jeb);
 	}
 
 	// Initializes the level
 	private void initLevel() {
 		score = 0;
 		level = new Level(Constants.LEVEL_01);
+		gameOver = false;
+		cameraHelper.setTarget(level.jeb);
+		startCamera = 0;
+		timeUntilCamera = 5;
+		initPhysics();
 	}
 
-	private Pixmap createProceduralPixmap(int width, int height) {
-		Pixmap pixmap = new Pixmap(width, height, Format.RGBA8888);
-
-		// Fill square with red color at 50% opacity
-		pixmap.setColor(1, 0, 0, 0.5f);
-		pixmap.fill();
-
-		// Draw a yellow-colored X shape on square
-		pixmap.setColor(1, 1, 0, 1);
-		pixmap.drawLine(0, 0, width, height);
-		pixmap.drawLine(width, 0, 0, height);
-
-		// Draw a cyan-colored border around square
-		pixmap.setColor(0, 1, 1, 1);
-		pixmap.drawRectangle(0, 0, width, height);
-		return pixmap;
-	}
-
+	/**
+	 * Update the world
+	 * 
+	 * @param deltaTime
+	 */
 	public void update(float deltaTime) {
-		handleDebugInput(deltaTime);
+
+		// TimeLeft game over.
+		if (isGameOver()) {
+			init();
+		} else {
+			handleInputJeb(deltaTime);
+		}
+
+		level.update(deltaTime);
 		cameraHelper.update(deltaTime);
+		b2World.step(deltaTime, 8, 3);
+
+		// move the camera up slowly
+		if (timeUntilCamera < startCamera)
+			if (level.jeb.slowUpgrade)
+				moveCameraUp(0.005f);
+			else
+				moveCameraUp(0.02f);
+		else
+			startCamera += deltaTime;
+
+		// check if jeb is below camera
+		// game over if jeb is lower than the camera
+		if (level.jeb.position.y < cameraHelper.getPosition().y - 9) {
+			gameOver = true;
+		}
 	}
 
-	private void handleDebugInput(float deltaTime) {
-		if (Gdx.app.getType() != ApplicationType.Desktop)
-			return;
+	/**
+	 * Handle Jeb
+	 */
+	private void handleInputJeb(float deltaTime) {
+		if (cameraHelper.hasTarget(level.jeb)) {
+			// Player Movement
+			if (Gdx.input.isKeyPressed(Keys.LEFT) && !level.jeb.hittingEdge) {
+				level.jeb.body.setLinearVelocity(-level.jeb.terminalVelocity.x, level.jeb.body.getLinearVelocity().y);
+			} else if (Gdx.input.isKeyPressed(Keys.RIGHT) && !level.jeb.hittingEdge) {
+				level.jeb.body.setLinearVelocity(level.jeb.terminalVelocity.x, level.jeb.body.getLinearVelocity().y);
+			} else if (Gdx.input.isKeyPressed(Keys.SPACE) && level.jeb.jetpackUpgrade) {
+				// only if there is a jet pack upgrade
+				level.jeb.body.setLinearVelocity(level.jeb.body.getLinearVelocity().x,
+						level.jeb.terminalVelocity.y * 1.5f);
+			} else if (Gdx.input.isKeyPressed(Keys.DOWN) && level.jeb.jetpackUpgrade) {
+				// only if there is a jet pack upgrade
+				level.jeb.body.setLinearVelocity(level.jeb.body.getLinearVelocity().x,
+						-level.jeb.terminalVelocity.y * 0.5f);
+			} else {
+				// Execute auto-forward movement on non-desktop platform
+				if (Gdx.app.getType() != ApplicationType.Desktop) {
+					level.jeb.body.getLinearVelocity().x = level.jeb.terminalVelocity.x;
+				}
+			}
 
-		// Camera Controls (move)
-		float camMoveSpeed = 5 * deltaTime;
-		float camMoveSpeedAccelerationFactor = 5;
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			camMoveSpeed *= camMoveSpeedAccelerationFactor;
-		if (Gdx.input.isKeyPressed(Keys.LEFT))
-			moveCamera(-camMoveSpeed, 0);
-		if (Gdx.input.isKeyPressed(Keys.RIGHT))
-			moveCamera(camMoveSpeed, 0);
-		if (Gdx.input.isKeyPressed(Keys.UP))
-			moveCamera(0, camMoveSpeed);
-		if (Gdx.input.isKeyPressed(Keys.DOWN))
-			moveCamera(0, -camMoveSpeed);
-		if (Gdx.input.isKeyPressed(Keys.BACKSPACE))
-			cameraHelper.setPosition(0, 0);
-
-		// Camera Controls (zoom)
-		float camZoomSpeed = 1 * deltaTime;
-		float camZoomSpeedAccelerationFactor = 5;
-		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
-			camZoomSpeed *= camZoomSpeedAccelerationFactor;
-		if (Gdx.input.isKeyPressed(Keys.COMMA))
-			cameraHelper.addZoom(camZoomSpeed);
-		if (Gdx.input.isKeyPressed(Keys.PERIOD))
-			cameraHelper.addZoom(-camZoomSpeed);
-		if (Gdx.input.isKeyPressed(Keys.SLASH))
-			cameraHelper.setZoom(1);
+			// jeb Jump
+			if (Gdx.input.isTouched() || Gdx.input.isKeyPressed(Keys.SPACE)) {
+				level.jeb.setJumping(true);
+			} else {
+				level.jeb.setJumping(false);
+			}
+		}
 	}
 
-	private void moveCamera(float x, float y) {
-		x += cameraHelper.getPosition().x;
+	/**
+	 * Allows for the camera to pan up
+	 * 
+	 * @param y
+	 */
+	private void moveCameraUp(float y) {
 		y += cameraHelper.getPosition().y;
-		cameraHelper.setPosition(x, y);
+		cameraHelper.setPosition(y);
 	}
 
+	/**
+	 * Reset the game if R is pressed
+	 */
 	@Override
 	public boolean keyUp(int keycode) {
 		// Reset game world
 		if (keycode == Keys.R) {
 			init();
 			Gdx.app.debug(TAG, "Game world resetted");
+		} else if (keycode == Keys.LEFT) {
+			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
+		} else if (keycode == Keys.RIGHT) {
+			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
 		}
 		return false;
+	}
+
+	// check if the game is over
+	// Method check if game is over.
+	public boolean isGameOver() {
+		return gameOver;
+	}
+
+	// box2d stuff below
+	// Initializes the physics for the in-game objects
+	private void initPhysics() {
+		if (b2World != null)
+			b2World.dispose();
+		b2World = new World(new Vector2(0, -9.81f), true);
+
+		// platforms
+		Vector2 origin = new Vector2();
+
+		for (SpringPlatform platform : level.sPlatforms) {
+			BodyDef bodyDef = new BodyDef();
+			bodyDef.type = BodyType.StaticBody;
+			bodyDef.position.set(platform.position);
+			Body body = b2World.createBody(bodyDef);
+			platform.body = body;
+			PolygonShape polygonShape = new PolygonShape();
+			origin.x = platform.bounds.width / 2.0f;
+			origin.y = platform.bounds.height / 2.0f;
+			polygonShape.setAsBox(platform.bounds.width / 2.0f, platform.bounds.height / 2.0f, origin, 0);
+			FixtureDef fixtureDef = new FixtureDef();
+			fixtureDef.shape = polygonShape;
+			body.createFixture(fixtureDef);
+			polygonShape.dispose();
+		}
+
+		// upgrades
+		for (SlowDownUpgrade slow : level.slow) {
+			System.out.println(slow);
+			BodyDef upgrade = new BodyDef();
+			upgrade.type = BodyType.StaticBody;
+			upgrade.position.set(slow.position);
+			Body body = b2World.createBody(upgrade);
+			slow.body = body;
+			slow.body.setUserData(slow);
+			PolygonShape polygonShape = new PolygonShape();
+			origin.x = slow.bounds.width / 2.0f;
+			origin.y = slow.bounds.height / 2.0f;
+			polygonShape.setAsBox(slow.bounds.width / 4.0f, slow.bounds.height / 4.0f, origin, 0);
+			FixtureDef fixtureDef = new FixtureDef();
+			fixtureDef.shape = polygonShape;
+			fixtureDef.isSensor = true;
+			body.createFixture(fixtureDef);
+			polygonShape.dispose();
+		}
+		for (DoubleJumpUpgrade doubles: level.doubles) {
+			System.out.println(doubles);
+			BodyDef upgrade = new BodyDef();
+			upgrade.type = BodyType.StaticBody;
+			upgrade.position.set(doubles.position);
+			Body body = b2World.createBody(upgrade);
+			doubles.body = body;
+			doubles.body.setUserData(doubles);
+			PolygonShape polygonShape = new PolygonShape();
+			origin.x = doubles.bounds.width / 2.0f;
+			origin.y = doubles.bounds.height / 2.0f;
+			polygonShape.setAsBox(doubles.bounds.width / 4.0f, doubles.bounds.height / 4.0f, origin, 0);
+			FixtureDef fixtureDef = new FixtureDef();
+			fixtureDef.shape = polygonShape;
+			fixtureDef.isSensor = true;
+			body.createFixture(fixtureDef);
+			polygonShape.dispose();
+		}
+		for (JetpackUpgrade jet : level.jetpack) {
+			System.out.println(jet);
+			BodyDef upgrade = new BodyDef();
+			upgrade.type = BodyType.StaticBody;
+			upgrade.position.set(jet.position);
+			Body body = b2World.createBody(upgrade);
+			jet.body = body;
+			jet.body.setUserData(jet);
+			PolygonShape polygonShape = new PolygonShape();
+			origin.x = jet.bounds.width / 2.0f;
+			origin.y = jet.bounds.height / 2.0f;
+			polygonShape.setAsBox(jet.bounds.width / 4.0f, jet.bounds.height / 4.0f, origin, 0);
+			FixtureDef fixtureDef = new FixtureDef();
+			fixtureDef.shape = polygonShape;
+			fixtureDef.isSensor = true;
+			body.createFixture(fixtureDef);
+			polygonShape.dispose();
+		}
+
+		// jeb box
+		BodyDef jeb = new BodyDef();
+		jeb.type = BodyType.DynamicBody;
+		jeb.position.set(level.jeb.position);
+		Body body = b2World.createBody(jeb);
+		level.jeb.body = body;
+		PolygonShape polygonShape = new PolygonShape();
+		origin.x = level.jeb.bounds.width / 2.0f;
+		origin.y = level.jeb.bounds.height / 2.0f;
+		polygonShape.setAsBox(level.jeb.bounds.width / 2.5f, level.jeb.bounds.height / 2.5f, origin, 0);
+		FixtureDef fixtureDef = new FixtureDef();
+		fixtureDef.shape = polygonShape;
+		body.createFixture(fixtureDef);
+		polygonShape.dispose();
+	}
+
+	@Override
+	public void dispose() {
+		if (b2World != null) {
+			b2World.dispose();
+		}
 	}
 }

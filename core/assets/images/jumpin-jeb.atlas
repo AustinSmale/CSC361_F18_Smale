@@ -18,23 +18,9 @@ Cloud2
   orig: 128, 128
   offset: 0, 0
   index: -1
-GrassLeftSpring
-  rotate: false
-  xy: 516, 582
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
 GrassMidSpring
   rotate: false
-  xy: 646, 712
-  size: 128, 128
-  orig: 128, 128
-  offset: 0, 0
-  index: -1
-GrassRightSpring
-  rotate: false
-  xy: 2, 2
+  xy: 516, 582
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
@@ -53,10 +39,38 @@ Hills2
   orig: 512, 288
   offset: 0, 0
   index: -1
-player
+double
   rotate: false
-  xy: 132, 160
+  xy: 646, 712
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+jetpack
+  rotate: false
+  xy: 516, 480
   size: 100, 100
   orig: 100, 100
+  offset: 0, 0
+  index: -1
+jetpackPower
+  rotate: false
+  xy: 2, 2
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+player
+  rotate: false
+  xy: 646, 610
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: -1
+slow
+  rotate: false
+  xy: 132, 132
+  size: 128, 128
+  orig: 128, 128
   offset: 0, 0
   index: -1

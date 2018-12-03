@@ -180,7 +180,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		Fixture a = contact.getFixtureA();
 		// jeb
 		Fixture b = contact.getFixtureB();
-
+		
 		// it is a platform
 		if (!a.isSensor()) {
 			// check if jeb is standing on top of a platform

@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,14 +11,31 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.game.Assets;
 import com.mygdx.game.game.WorldController;
 import com.mygdx.game.game.WorldRenderer;
+import com.mygdx.game.screens.MenuScreen;
 
-public class JumpinJeb extends ApplicationAdapter {
+public class JumpinJeb extends Game {
 	private static final String TAG = JumpinJeb.class.getName();
 
 	private WorldController worldController;
 	private WorldRenderer worldRenderer;
 	private boolean paused;
 
+	
+	/**
+	 * Initialize the window and game  
+	 */
+	@Override 
+	public void create() {
+		// Set Libgdx log level to DEBUG
+		Gdx.app.setLogLevel(Application.LOG_DEBUG);
+		
+		// Load Assets
+		Assets.instance.init(new AssetManager());
+		
+		//Start the game at the menu screen
+		setScreen(new MenuScreen(this));
+	}
+	/**
 	@Override
 	public void create() {
 		// Set Libgdx log level to DEBUG
@@ -65,5 +83,5 @@ public class JumpinJeb extends ApplicationAdapter {
 	@Override
 	public void dispose() {
 		worldRenderer.dispose();
-	}
+	}*/
 }

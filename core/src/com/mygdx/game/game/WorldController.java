@@ -1,6 +1,7 @@
 package com.mygdx.game.game;
 
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
@@ -17,6 +18,7 @@ import com.mygdx.game.game.objects.DoubleJumpUpgrade;
 import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
+import com.mygdx.game.screens.MenuScreen;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
@@ -36,7 +38,10 @@ public class WorldController extends InputAdapter implements Disposable {
 	private float startCamera;
 	private float timeUntilCamera;
 
-	public WorldController() {
+	private Game game;
+
+	public WorldController(Game game) {
+		this.game = game;
 		init();
 	}
 
@@ -70,7 +75,7 @@ public class WorldController extends InputAdapter implements Disposable {
 
 		// TimeLeft game over.
 		if (isGameOver()) {
-			init();
+			game.setScreen(new MenuScreen(game));
 		} else {
 			handleInputJeb(deltaTime);
 		}
@@ -152,6 +157,9 @@ public class WorldController extends InputAdapter implements Disposable {
 			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
 		} else if (keycode == Keys.RIGHT) {
 			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
+		}
+		else if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
+			game.setScreen(new MenuScreen(game));
 		}
 		return false;
 	}

@@ -18,6 +18,7 @@ import com.mygdx.game.game.objects.DoubleJumpUpgrade;
 import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
+import com.mygdx.game.screens.HighScoreScreen;
 import com.mygdx.game.screens.MenuScreen;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
@@ -26,7 +27,7 @@ public class WorldController extends InputAdapter implements Disposable {
 	private static final String TAG = WorldController.class.getName();
 
 	public Level level;
-	public int score;
+	public static int score;
 	private boolean gameOver;
 	private float gameOverDelay;
 	// bounding boxes
@@ -78,7 +79,7 @@ public class WorldController extends InputAdapter implements Disposable {
 		if (isGameOver()) {
 			gameOverDelay -= deltaTime;
 			if(gameOverDelay < 0) {
-				game.setScreen(new MenuScreen(game));
+				game.setScreen(new HighScoreScreen(game));
 			}
 		} else {
 			handleInputJeb(deltaTime);

@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.mygdx.game.util.Constants;
@@ -97,7 +98,6 @@ public class MenuScreen extends AbstractGameScreen {
 		stack.add(layerPlayButton);
 		stack.add(layerSettingsButton);
 		stack.add(layerSettingsWindow);
-
 	}
 
 	/**

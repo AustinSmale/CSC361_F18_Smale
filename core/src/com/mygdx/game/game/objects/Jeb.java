@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.game.game.Assets;
+import com.mygdx.game.game.WorldController;
 import com.mygdx.game.util.Constants;
 
 public class Jeb extends AbstractGameObject implements ContactListener {
@@ -167,7 +168,6 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		// get the highest point reached to be used as the score
 		if (maxHeight < (int) (position.y + .585f)) {
 			maxHeight = (int) (position.y + .585f);
-			System.out.println(maxHeight);
 		}
 	}
 

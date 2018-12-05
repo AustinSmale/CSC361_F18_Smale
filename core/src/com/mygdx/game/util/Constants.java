@@ -12,6 +12,9 @@ public class Constants {
 
 	// Location of image file for level 01
 	public static final String LEVEL_01 = "levels/level-00.png";
+	
+	// Game over delay
+	public static final float GAME_OVER_DELAY = 5;
 
 	// time of power ups
 	public static final float SLOW_DURATION = 10;

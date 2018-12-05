@@ -4,19 +4,19 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Disposable;
-
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-
 import com.mygdx.game.util.Constants;
 
 public class Assets implements Disposable, AssetErrorListener {
 	public static final String TAG = Assets.class.getName();
 	public static final Assets instance = new Assets();
 	private AssetManager assetManager;
+	public AssetFonts fonts;
 
 	// Singleton Pattern: prevents instantiation from the other classes.
 	private Assets() {
@@ -53,6 +53,7 @@ public class Assets implements Disposable, AssetErrorListener {
 		sPlatform = new AssetSpringPlatform(atlas);
 		levelDecoration = new AssetLevelDecoration(atlas);
 		powerUps = new AssetPowerUps(atlas);
+		fonts = new AssetFonts();
 	}
 
 	// Disposes of the assetManager
@@ -91,22 +92,19 @@ public class Assets implements Disposable, AssetErrorListener {
 			player = atlas.findRegion("player");
 		}
 	}
-	
+
 	/**
-	 * All the power ups in the game
-	 * 1: Slow Down Time
-	 * 2: Jetpack
-	 * 3: Double Jump
+	 * All the power ups in the game 1: Slow Down Time 2: Jetpack 3: Double Jump
 	 * 
 	 * @author Austin
 	 *
 	 */
 	public class AssetPowerUps {
 		public final AtlasRegion slow;
-		public final AtlasRegion jetpackPU;		// the power up icon
-		public final AtlasRegion jetpackJeb;	// the jet pack that goes on jeb
+		public final AtlasRegion jetpackPU; // the power up icon
+		public final AtlasRegion jetpackJeb; // the jet pack that goes on jeb
 		public final AtlasRegion doubleJump;
-		
+
 		public AssetPowerUps(TextureAtlas atlas) {
 			slow = atlas.findRegion("slow");
 			jetpackPU = atlas.findRegion("jetpackPower");
@@ -114,12 +112,12 @@ public class Assets implements Disposable, AssetErrorListener {
 			doubleJump = atlas.findRegion("double");
 		}
 	}
-	
+
 	// Level Decoration Assets
 	public class AssetLevelDecoration {
 		public final AtlasRegion hillFront;
 		public final AtlasRegion hillBack;
-		
+
 		public AssetLevelDecoration(TextureAtlas atlas) {
 			hillFront = atlas.findRegion("Hills1");
 			hillBack = atlas.findRegion("Hills2");
@@ -129,5 +127,34 @@ public class Assets implements Disposable, AssetErrorListener {
 	// just need for now
 	@Override
 	public void error(AssetDescriptor asset, Throwable throwable) {
+	}
+
+	public class AssetFonts {
+		// sizes
+		public final BitmapFont fps;
+		public final BitmapFont defaultSmall;
+		public final BitmapFont defaultNormal;
+		public final BitmapFont defaultBig;
+
+		public AssetFonts() {
+			// create three fonts using Libgdx's 15px bitmap font
+			fps = new BitmapFont(Gdx.files.internal("images/arial-15.fnt"), true);
+			defaultSmall = new BitmapFont(Gdx.files.internal("images/jebfont.fnt"), true);
+			defaultNormal = new BitmapFont(Gdx.files.internal("images/jebfont.fnt"), true);
+			defaultBig = new BitmapFont(Gdx.files.internal("images/jebfont.fnt"), true);
+
+			// set font sizes
+			fps.getData().setScale(1);
+			defaultSmall.getData().setScale(0.75f);
+			defaultNormal.getData().setScale(1.0f);
+			defaultBig.getData().setScale(2.0f);
+
+			// enable linear texture filtering for smooth fonts
+			fps.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			defaultSmall.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			defaultNormal.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			defaultBig.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
+		}
 	}
 }

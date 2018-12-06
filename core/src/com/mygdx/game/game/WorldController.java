@@ -277,7 +277,6 @@ public class WorldController extends InputAdapter implements Disposable {
 		polygonShape.dispose();
 	}
 
-	@Override
 	public void dispose() {
 		if (b2World != null) {
 			b2World.dispose();

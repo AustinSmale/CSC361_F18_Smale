@@ -108,7 +108,7 @@ public class HighScoreScreen extends AbstractGameScreen {
 	}
 
 	protected void onSaveClicked() {
-		String name = tfName.getMessageText();
+		String name = tfName.getText();
 		if (name == null) {
 			name = "Unknown";
 		}
@@ -117,6 +117,7 @@ public class HighScoreScreen extends AbstractGameScreen {
 			if (hs.get(i) < score) {
 				hs.add(i, score);
 				un.add(i, name);
+				break;
 			}
 		}
 

@@ -9,7 +9,7 @@ import com.mygdx.game.JumpinJeb;
 
 public class DesktopLauncher {
 	private static boolean rebuildAtlas = false;
-	private static boolean drawDebugOutline = false;
+	private static boolean drawDebugOutline = true;
 
 	public static void main(String[] arg) {
 		// if you need to rebuild the atlas settings
@@ -20,6 +20,7 @@ public class DesktopLauncher {
 			settings.debug = drawDebugOutline;
 			// process the texture and add it to a pack
 			TexturePacker.process(settings, "assets-raw/images", "../core/assets/images", "jumpin-jeb.atlas");
+			TexturePacker.process(settings, "assets-raw/menu", "../core/assets/images", "jumpin-jeb-menu.atlas");
 		}
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.title = "Jumpin Jeb";

@@ -1,6 +1,7 @@
 package com.mygdx.game.game;
 
 import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
@@ -17,6 +18,8 @@ import com.mygdx.game.game.objects.DoubleJumpUpgrade;
 import com.mygdx.game.game.objects.JetpackUpgrade;
 import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
+import com.mygdx.game.screens.HighScoreScreen;
+import com.mygdx.game.screens.MenuScreen;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
@@ -24,8 +27,9 @@ public class WorldController extends InputAdapter implements Disposable {
 	private static final String TAG = WorldController.class.getName();
 
 	public Level level;
-	public int score;
+	public static int score;
 	private boolean gameOver;
+	private float gameOverDelay;
 	// bounding boxes
 	private Rectangle r1 = new Rectangle();
 	private Rectangle r2 = new Rectangle();
@@ -36,7 +40,10 @@ public class WorldController extends InputAdapter implements Disposable {
 	private float startCamera;
 	private float timeUntilCamera;
 
-	public WorldController() {
+	private Game game;
+
+	public WorldController(Game game) {
+		this.game = game;
 		init();
 	}
 
@@ -46,6 +53,7 @@ public class WorldController extends InputAdapter implements Disposable {
 	private void init() {
 		Gdx.input.setInputProcessor(this);
 		cameraHelper = new CameraHelper();
+		gameOverDelay = 0;
 		initLevel();
 		b2World.setContactListener(level.jeb);
 	}
@@ -67,10 +75,12 @@ public class WorldController extends InputAdapter implements Disposable {
 	 * @param deltaTime
 	 */
 	public void update(float deltaTime) {
-
 		// TimeLeft game over.
 		if (isGameOver()) {
-			init();
+			gameOverDelay -= deltaTime;
+			if(gameOverDelay < 0) {
+				game.setScreen(new HighScoreScreen(game));
+			}
 		} else {
 			handleInputJeb(deltaTime);
 		}
@@ -90,9 +100,13 @@ public class WorldController extends InputAdapter implements Disposable {
 
 		// check if jeb is below camera
 		// game over if jeb is lower than the camera
-		if (level.jeb.position.y < cameraHelper.getPosition().y - 9) {
+		if (level.jeb.position.y < cameraHelper.getPosition().y - 9 && !gameOver) {
 			gameOver = true;
+			gameOverDelay = Constants.GAME_OVER_DELAY;
 		}
+		
+		// get the score
+		score = level.jeb.maxHeight;
 	}
 
 	/**
@@ -152,6 +166,9 @@ public class WorldController extends InputAdapter implements Disposable {
 			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
 		} else if (keycode == Keys.RIGHT) {
 			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
+		}
+		else if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
+			game.setScreen(new MenuScreen(game));
 		}
 		return false;
 	}
@@ -260,7 +277,6 @@ public class WorldController extends InputAdapter implements Disposable {
 		polygonShape.dispose();
 	}
 
-	@Override
 	public void dispose() {
 		if (b2World != null) {
 			b2World.dispose();

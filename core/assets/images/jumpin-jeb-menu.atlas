@@ -1,0 +1,27 @@
+
+jumpin-jeb-menu.png
+size: 1024,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+play
+  rotate: false
+  xy: 2, 2
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+settings
+  rotate: false
+  xy: 704, 704
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+ui-bg
+  rotate: false
+  xy: 2, 68
+  size: 700, 700
+  orig: 700, 700
+  offset: 0, 0
+  index: -1

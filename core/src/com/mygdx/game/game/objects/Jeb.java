@@ -14,18 +14,13 @@ import com.mygdx.game.util.Constants;
 public class Jeb extends AbstractGameObject implements ContactListener {
 	public static final String TAG = Jeb.class.getName();
 
-
-	public enum VIEW_DIRECTION {
-		LEFT, RIGHT
-	}
-
 	public enum JUMP_STATE {
 		GROUNDED, JUMP
 	}
 
 	private TextureRegion regPlayer;
 	private TextureRegion jetpack;
-	public VIEW_DIRECTION viewDirection;
+	public boolean viewDirection;
 	public float timeJumping;
 	public JUMP_STATE jumpState;
 	public boolean slowUpgrade;
@@ -36,6 +31,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	public boolean hittingEdge;
 	public boolean stillJumping;
 	public int maxHeight;
+	int stateTime;
 
 	public Jeb() {
 		init();
@@ -46,7 +42,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	 */
 	public void init() {
 		dimension.set(1, 1);
-		regPlayer = Assets.instance.player.player;
+		regPlayer = Assets.instance.player.idle;
 		// Center image on game object
 		origin.set(dimension.x / 2, dimension.y);
 		// Bounding box for collision detection
@@ -54,10 +50,12 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		// Set physics values
 		terminalVelocity.set(4.0f, 7.5f);
 		// View direction
-		viewDirection = VIEW_DIRECTION.LEFT;
+		// false for left, true for right
+		viewDirection = false;
 		// Jump state
 		jumpState = JUMP_STATE.GROUNDED;
 		timeJumping = 0;
+		stateTime = 0;
 
 		// get the jetpack
 		jetpack = Assets.instance.powerUps.jetpackJeb;
@@ -114,14 +112,14 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 			reg = jetpack;
 			batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
 					scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
-					false, false);
+					viewDirection, false);
 		}
 
 		// set the region to jeb
 		reg = regPlayer;
 		batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
 				scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
-				viewDirection == VIEW_DIRECTION.LEFT, false);
+				viewDirection, false);
 	}
 
 	public void setSlowUpgrade(boolean pickedUp) {
@@ -169,6 +167,43 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		if (maxHeight < (int) (position.y + .585f)) {
 			maxHeight = (int) (position.y + .585f);
 		}
+
+		// set correct image/animation
+		regPlayer = setRegion();
+	}
+
+	private TextureRegion setRegion() {
+		// idle
+		if (body.getLinearVelocity().x == 0 && body.getLinearVelocity().y == 0) {
+			stateTime = 0;
+			return Assets.instance.player.idle;
+		}
+		// running
+		else if (body.getLinearVelocity().x != 0 && body.getLinearVelocity().y == 0) {
+			if (body.getLinearVelocity().x > 0)
+				viewDirection = false;
+			else
+				viewDirection = true;
+			return (TextureRegion) Assets.instance.player.running.getKeyFrame(stateTime++, true);
+		}
+		// jumping up
+		else if (body.getLinearVelocity().y > 0) {
+			if (body.getLinearVelocity().x > 0)
+				viewDirection = false;
+			else
+				viewDirection = true;
+			stateTime = 0;
+			return Assets.instance.player.up;
+		}
+		// down
+		else {
+			if (body.getLinearVelocity().x > 0)
+				viewDirection = false;
+			else
+				viewDirection = true;
+			stateTime = 0;
+			return Assets.instance.player.down;
+		}
 	}
 
 	/**
@@ -180,7 +215,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		Fixture a = contact.getFixtureA();
 		// jeb
 		Fixture b = contact.getFixtureB();
-		
+
 		// it is a platform
 		if (!a.isSensor()) {
 			// check if jeb is standing on top of a platform
@@ -196,23 +231,21 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		}
 		// contatcs a upgrade
 		else {
-			if(a.getBody().getUserData().getClass() == SlowDownUpgrade.class) {
+			if (a.getBody().getUserData().getClass() == SlowDownUpgrade.class) {
 				SlowDownUpgrade upg = (SlowDownUpgrade) a.getBody().getUserData();
-				if(!upg.collected) {
+				if (!upg.collected) {
 					upg.collected = true;
 					setSlowUpgrade(true);
 				}
-			}
-			else if (a.getBody().getUserData().getClass() == JetpackUpgrade.class) {
+			} else if (a.getBody().getUserData().getClass() == JetpackUpgrade.class) {
 				JetpackUpgrade upg = (JetpackUpgrade) a.getBody().getUserData();
-				if(!upg.collected) {
+				if (!upg.collected) {
 					upg.collected = true;
 					setJetpackUpgrade(true);
 				}
-			}
-			else if (a.getBody().getUserData().getClass() == DoubleJumpUpgrade.class) {
+			} else if (a.getBody().getUserData().getClass() == DoubleJumpUpgrade.class) {
 				DoubleJumpUpgrade upg = (DoubleJumpUpgrade) a.getBody().getUserData();
-				if(!upg.collected) {
+				if (!upg.collected) {
 					upg.collected = true;
 					setDoubleJumpUpgrade(true);
 				}

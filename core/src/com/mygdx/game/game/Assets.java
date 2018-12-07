@@ -6,9 +6,11 @@ import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.util.Constants;
 
@@ -86,10 +88,26 @@ public class Assets implements Disposable, AssetErrorListener {
 
 	// Player Asset, will change just a placeholder
 	public class AssetPlayer {
-		public final AtlasRegion player;
+		public final AtlasRegion idle;
+		public final Animation running;
+		public final AtlasRegion up;
+		public final AtlasRegion down;
 
 		public AssetPlayer(TextureAtlas atlas) {
-			player = atlas.findRegion("player");
+			idle = atlas.findRegion("player");
+
+			// animation
+			Array<AtlasRegion> anm = new Array<AtlasRegion>();
+			anm.add(atlas.findRegion("run_anm", 1));
+			anm.add(atlas.findRegion("run_anm", 2));
+			anm.add(atlas.findRegion("run_anm", 3));
+			anm.add(atlas.findRegion("run_anm", 4));
+			anm.add(atlas.findRegion("run_anm", 5));
+			anm.add(atlas.findRegion("run_anm", 6));
+
+			running = new Animation(5.0f, anm, Animation.PlayMode.LOOP);
+			up = atlas.findRegion("jump-up");
+			down = atlas.findRegion("jump-down");
 		}
 	}
 

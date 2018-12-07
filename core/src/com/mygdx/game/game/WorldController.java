@@ -75,16 +75,6 @@ public class WorldController extends InputAdapter implements Disposable {
 	 * @param deltaTime
 	 */
 	public void update(float deltaTime) {
-		// TimeLeft game over.
-		if (isGameOver()) {
-			gameOverDelay -= deltaTime;
-			if(gameOverDelay < 0) {
-				game.setScreen(new HighScoreScreen(game));
-			}
-		} else {
-			handleInputJeb(deltaTime);
-		}
-
 		level.update(deltaTime);
 		cameraHelper.update(deltaTime);
 		b2World.step(deltaTime, 8, 3);
@@ -93,6 +83,8 @@ public class WorldController extends InputAdapter implements Disposable {
 		if (timeUntilCamera < startCamera)
 			if (level.jeb.slowUpgrade)
 				moveCameraUp(0.005f);
+			else if(gameOverDelay < 0) 
+				moveCameraUp(0);
 			else
 				moveCameraUp(0.02f);
 		else
@@ -107,6 +99,16 @@ public class WorldController extends InputAdapter implements Disposable {
 		
 		// get the score
 		score = level.jeb.maxHeight;
+		
+		// TimeLeft game over.
+				if (isGameOver()) {
+					gameOverDelay -= deltaTime;
+					if(gameOverDelay < 0) {
+						game.setScreen(new HighScoreScreen(game));
+					}
+				} else {
+					handleInputJeb(deltaTime);
+				}
 	}
 
 	/**

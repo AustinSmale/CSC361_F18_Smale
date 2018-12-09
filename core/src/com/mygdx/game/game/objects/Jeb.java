@@ -1,5 +1,7 @@
 package com.mygdx.game.game.objects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -8,7 +10,6 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.game.game.Assets;
-import com.mygdx.game.game.WorldController;
 import com.mygdx.game.util.Constants;
 
 public class Jeb extends AbstractGameObject implements ContactListener {
@@ -32,6 +33,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	public boolean stillJumping;
 	public int maxHeight;
 	int stateTime;
+	public ParticleEffect particle = new ParticleEffect();
 
 	public Jeb() {
 		init();
@@ -75,6 +77,9 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 
 		// score
 		maxHeight = 0;
+		
+		// particles
+		particle.load(Gdx.files.internal("particles/jetpack.px"), Gdx.files.internal("particles"));
 	}
 
 	/**
@@ -110,6 +115,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		// render the jetpack if jeb has it before jeb
 		if (jetpackUpgrade) {
 			reg = jetpack;
+			particle.draw(batch);
 			batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
 					scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
 					viewDirection, false);
@@ -156,11 +162,18 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		}
 		// update jetpack time
 		if (jetpackTimeLeft > 0) {
+			// move particles to correct position
+			if(viewDirection) 
+				particle.setPosition(body.getPosition().x+bounds.width-0.1f, body.getPosition().y+0.1f);
+			else
+				particle.setPosition(body.getPosition().x+0.1f, body.getPosition().y+0.1f);
+			particle.update(deltaTime);
 			jetpackTimeLeft -= deltaTime;
 			// disable to power up
 			if (jetpackTimeLeft < 0) {
 				jetpackTimeLeft = 0;
 				setJetpackUpgrade(false);
+				particle.allowCompletion();
 			}
 		}
 		// get the highest point reached to be used as the score

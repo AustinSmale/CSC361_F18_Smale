@@ -1,17 +1,15 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Application;
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.game.Assets;
 import com.mygdx.game.game.WorldController;
 import com.mygdx.game.game.WorldRenderer;
 import com.mygdx.game.screens.MenuScreen;
+import com.mygdx.game.util.AudioManager;
+import com.mygdx.game.util.GamePreferences;
 
 public class JumpinJeb extends Game {
 	private static final String TAG = JumpinJeb.class.getName();
@@ -31,6 +29,10 @@ public class JumpinJeb extends Game {
 		
 		// Load Assets
 		Assets.instance.init(new AssetManager());
+		
+		// load preferences and play music
+		GamePreferences.instance.load();
+		AudioManager.instance.play(Assets.instance.music.song);
 		
 		//Start the game at the menu screen
 		setScreen(new MenuScreen(this));

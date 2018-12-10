@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetErrorListener;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -28,6 +30,8 @@ public class Assets implements Disposable, AssetErrorListener {
 	public AssetSpringPlatform sPlatform;
 	public AssetLevelDecoration levelDecoration;
 	public AssetPowerUps powerUps;
+	public AssetSound sounds;
+	public AssetMusic music;
 
 	public void init(AssetManager assetManager) {
 		this.assetManager = assetManager;
@@ -37,6 +41,14 @@ public class Assets implements Disposable, AssetErrorListener {
 
 		// Load texture atlas
 		assetManager.load(Constants.TEXTURE_ATLAS_OBJECTS, TextureAtlas.class);
+
+		// Load sounds into engine
+		assetManager.load("sounds/jump.wav", Sound.class);
+		assetManager.load("sounds/gameover.mp3", Sound.class);
+		assetManager.load("sounds/jetpack.wav", Sound.class);
+
+		// Load music into engine
+		assetManager.load("music/wallpaper.mp3", Music.class);
 
 		// Start loading assets and wait until finished
 		assetManager.finishLoading();
@@ -56,12 +68,18 @@ public class Assets implements Disposable, AssetErrorListener {
 		levelDecoration = new AssetLevelDecoration(atlas);
 		powerUps = new AssetPowerUps(atlas);
 		fonts = new AssetFonts();
+		sounds = new AssetSound(assetManager);
+		music = new AssetMusic(assetManager);
 	}
 
 	// Disposes of the assetManager
 	@Override
 	public void dispose() {
 		assetManager.dispose();
+		fonts.defaultBig.dispose();
+		fonts.defaultNormal.dispose();
+		fonts.defaultSmall.dispose();
+		fonts.fps.dispose();
 	}
 
 	// Error for when the asset cannot be loaded.
@@ -173,6 +191,26 @@ public class Assets implements Disposable, AssetErrorListener {
 			defaultNormal.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
 			defaultBig.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
 
+		}
+	}
+
+	public class AssetMusic {
+		public final Music song;
+
+		public AssetMusic(AssetManager am) {
+			song = am.get("music/wallpaper.mp3", Music.class);
+		}
+	}
+
+	public class AssetSound {
+		public final Sound gameover;
+		public final Sound jetpack;
+		public final Sound jump;
+
+		public AssetSound(AssetManager am) {
+			gameover = am.get("sounds/gameover.mp3", Sound.class);
+			jetpack = am.get("sounds/jetpack.wav", Sound.class);
+			jump = am.get("sounds/jump.wav", Sound.class);
 		}
 	}
 }

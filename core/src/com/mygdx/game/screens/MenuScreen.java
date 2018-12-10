@@ -16,9 +16,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.mygdx.game.util.AudioManager;
 import com.mygdx.game.util.Constants;
 import com.mygdx.game.util.GamePreferences;
 
@@ -276,11 +276,13 @@ public class MenuScreen extends AbstractGameScreen {
 		btnMenuPlay.setVisible(true);
 		btnMenuOptions.setVisible(true);
 		winOptions.setVisible(false);
+		AudioManager.instance.onSettingsUpdated();
 	}
 
 	protected void onSaveClicked() {
 		saveSettings();
 		onCancelClicked();
+		AudioManager.instance.onSettingsUpdated();
 	}
 
 	/**
@@ -296,7 +298,6 @@ public class MenuScreen extends AbstractGameScreen {
 		return layer;
 	}
 
-	
 	/**
 	 * Load the settings saved
 	 */
@@ -309,7 +310,7 @@ public class MenuScreen extends AbstractGameScreen {
 		sldMusic.setValue(prefs.volMusic);
 		chkShowFpsCounter.setChecked(prefs.showFpsCounter);
 	}
-	
+
 	/**
 	 * Method saves preferences
 	 */
@@ -322,7 +323,7 @@ public class MenuScreen extends AbstractGameScreen {
 		prefs.showFpsCounter = chkShowFpsCounter.isChecked();
 		prefs.save();
 	}
-	
+
 	@Override
 	public void hide() {
 		stage.dispose();

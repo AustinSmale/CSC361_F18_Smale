@@ -88,9 +88,9 @@ public class WorldRenderer implements Disposable {
 	private void renderGuiGameOverMessage(SpriteBatch batch) {
 		float x = gui.viewportWidth / 2;
 		float y = gui.viewportHeight / 2;
-		if (worldController.isGameOver()) {
+		if (worldController.isGameOver() && worldController.gameOverDelay < 1.64f) {
 			BitmapFont fontGameOver = Assets.instance.fonts.defaultBig;
-			fontGameOver.setColor(1, 0.75f, 0.25f, 1);
+			fontGameOver.setColor(1, 0, 0, 1);
 			fontGameOver.draw(batch, "GAME OVER", x, y, 1, Align.center, false);
 			fontGameOver.setColor(1, 1, 1, 1);
 		}	

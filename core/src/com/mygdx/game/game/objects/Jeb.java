@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.game.game.Assets;
+import com.mygdx.game.util.AudioManager;
 import com.mygdx.game.util.Constants;
 
 public class Jeb extends AbstractGameObject implements ContactListener {
@@ -92,6 +93,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	public void setJumping(boolean jumpKeyPressed) {
 		// you can jump if you are not jumping or have dobule jump
 		if (jumpKeyPressed && jumpState == JUMP_STATE.GROUNDED) {
+			AudioManager.instance.play(Assets.instance.sounds.jump);
 			body.setLinearVelocity(body.getLinearVelocity().x, terminalVelocity.y);
 			jumpState = JUMP_STATE.JUMP;
 			stillJumping = true;
@@ -102,6 +104,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		}
 		// double jump
 		if (!stillJumping && jumpKeyPressed && doubleJump) {
+			AudioManager.instance.play(Assets.instance.sounds.jump);
 			body.setLinearVelocity(body.getLinearVelocity().x, terminalVelocity.y);
 			setDoubleJumpUpgrade(false);
 		}
@@ -136,8 +139,10 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 
 	public void setJetpackUpgrade(boolean pickedUp) {
 		jetpackUpgrade = pickedUp;
-		if (pickedUp)
+		if (pickedUp) {
+			AudioManager.instance.play(Assets.instance.sounds.jetpack);
 			jetpackTimeLeft = Constants.JETPACK_DURATION;
+		}
 	}
 
 	public void setDoubleJumpUpgrade(boolean pickedUp) {

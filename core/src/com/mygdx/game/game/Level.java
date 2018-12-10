@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.game.objects.AbstractGameObject;
+import com.mygdx.game.game.objects.Clouds;
 import com.mygdx.game.game.objects.DoubleJumpUpgrade;
 import com.mygdx.game.game.objects.Hills;
 import com.mygdx.game.game.objects.Jeb;
@@ -46,6 +47,7 @@ public class Level {
 	public static Array<SlowDownUpgrade> slow;
 	public static Array<JetpackUpgrade> jetpack;
 	public static Array<DoubleJumpUpgrade> doubles;
+	public Clouds clouds;
 
 	public Level(String filename) {
 		init(filename);
@@ -149,6 +151,7 @@ public class Level {
 
 		// level decoration
 		hills = new Hills();
+		clouds = new Clouds();
 
 		// Free memory
 		pixmap.dispose();
@@ -180,6 +183,10 @@ public class Level {
 
 		// draw jeb
 		jeb.render(batch);
+		
+		// Draw Clouds
+		clouds.render(batch);
+
 
 	}
 
@@ -199,5 +206,7 @@ public class Level {
 		for (DoubleJumpUpgrade jump : doubles) {
 			jump.update(deltaTime);
 		}
+		clouds.position.set(jeb.position);
+		clouds.update(deltaTime);
 	}
 }

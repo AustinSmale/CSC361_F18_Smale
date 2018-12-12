@@ -20,6 +20,7 @@ import com.mygdx.game.game.objects.SlowDownUpgrade;
 import com.mygdx.game.game.objects.SpringPlatform;
 import com.mygdx.game.screens.HighScoreScreen;
 import com.mygdx.game.screens.MenuScreen;
+import com.mygdx.game.util.AudioManager;
 import com.mygdx.game.util.CameraHelper;
 import com.mygdx.game.util.Constants;
 
@@ -29,7 +30,7 @@ public class WorldController extends InputAdapter implements Disposable {
 	public Level level;
 	public static int score;
 	private boolean gameOver;
-	private float gameOverDelay;
+	public float gameOverDelay;
 	// bounding boxes
 	private Rectangle r1 = new Rectangle();
 	private Rectangle r2 = new Rectangle();
@@ -75,16 +76,6 @@ public class WorldController extends InputAdapter implements Disposable {
 	 * @param deltaTime
 	 */
 	public void update(float deltaTime) {
-		// TimeLeft game over.
-		if (isGameOver()) {
-			gameOverDelay -= deltaTime;
-			if(gameOverDelay < 0) {
-				game.setScreen(new HighScoreScreen(game));
-			}
-		} else {
-			handleInputJeb(deltaTime);
-		}
-
 		level.update(deltaTime);
 		cameraHelper.update(deltaTime);
 		b2World.step(deltaTime, 8, 3);
@@ -93,6 +84,8 @@ public class WorldController extends InputAdapter implements Disposable {
 		if (timeUntilCamera < startCamera)
 			if (level.jeb.slowUpgrade)
 				moveCameraUp(0.005f);
+			else if (gameOverDelay < 0)
+				moveCameraUp(0);
 			else
 				moveCameraUp(0.02f);
 		else
@@ -103,10 +96,21 @@ public class WorldController extends InputAdapter implements Disposable {
 		if (level.jeb.position.y < cameraHelper.getPosition().y - 9 && !gameOver) {
 			gameOver = true;
 			gameOverDelay = Constants.GAME_OVER_DELAY;
+			AudioManager.instance.play(Assets.instance.sounds.gameover);
 		}
-		
+
 		// get the score
 		score = level.jeb.maxHeight;
+
+		// TimeLeft game over.
+		if (isGameOver()) {
+			gameOverDelay -= deltaTime;
+			if (gameOverDelay < 0) {
+				game.setScreen(new HighScoreScreen(game));
+			}
+		} else {
+			handleInputJeb(deltaTime);
+		}
 	}
 
 	/**
@@ -166,8 +170,7 @@ public class WorldController extends InputAdapter implements Disposable {
 			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
 		} else if (keycode == Keys.RIGHT) {
 			level.jeb.body.setLinearVelocity(0, level.jeb.body.getLinearVelocity().y);
-		}
-		else if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
+		} else if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
 			game.setScreen(new MenuScreen(game));
 		}
 		return false;
@@ -224,7 +227,7 @@ public class WorldController extends InputAdapter implements Disposable {
 			body.createFixture(fixtureDef);
 			polygonShape.dispose();
 		}
-		for (DoubleJumpUpgrade doubles: level.doubles) {
+		for (DoubleJumpUpgrade doubles : level.doubles) {
 			System.out.println(doubles);
 			BodyDef upgrade = new BodyDef();
 			upgrade.type = BodyType.StaticBody;

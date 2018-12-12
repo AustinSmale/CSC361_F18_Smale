@@ -1,5 +1,7 @@
 package com.mygdx.game.game.objects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Contact;
@@ -8,16 +10,11 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.game.game.Assets;
-import com.mygdx.game.game.WorldController;
+import com.mygdx.game.util.AudioManager;
 import com.mygdx.game.util.Constants;
 
 public class Jeb extends AbstractGameObject implements ContactListener {
 	public static final String TAG = Jeb.class.getName();
-
-
-	public enum VIEW_DIRECTION {
-		LEFT, RIGHT
-	}
 
 	public enum JUMP_STATE {
 		GROUNDED, JUMP
@@ -25,7 +22,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 
 	private TextureRegion regPlayer;
 	private TextureRegion jetpack;
-	public VIEW_DIRECTION viewDirection;
+	public boolean viewDirection;
 	public float timeJumping;
 	public JUMP_STATE jumpState;
 	public boolean slowUpgrade;
@@ -36,6 +33,8 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	public boolean hittingEdge;
 	public boolean stillJumping;
 	public int maxHeight;
+	int stateTime;
+	public ParticleEffect particle = new ParticleEffect();
 
 	public Jeb() {
 		init();
@@ -46,7 +45,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	 */
 	public void init() {
 		dimension.set(1, 1);
-		regPlayer = Assets.instance.player.player;
+		regPlayer = Assets.instance.player.idle;
 		// Center image on game object
 		origin.set(dimension.x / 2, dimension.y);
 		// Bounding box for collision detection
@@ -54,10 +53,12 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		// Set physics values
 		terminalVelocity.set(4.0f, 7.5f);
 		// View direction
-		viewDirection = VIEW_DIRECTION.LEFT;
+		// false for left, true for right
+		viewDirection = false;
 		// Jump state
 		jumpState = JUMP_STATE.GROUNDED;
 		timeJumping = 0;
+		stateTime = 0;
 
 		// get the jetpack
 		jetpack = Assets.instance.powerUps.jetpackJeb;
@@ -77,6 +78,9 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 
 		// score
 		maxHeight = 0;
+		
+		// particles
+		particle.load(Gdx.files.internal("particles/jetpack.px"), Gdx.files.internal("particles"));
 	}
 
 	/**
@@ -89,6 +93,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 	public void setJumping(boolean jumpKeyPressed) {
 		// you can jump if you are not jumping or have dobule jump
 		if (jumpKeyPressed && jumpState == JUMP_STATE.GROUNDED) {
+			AudioManager.instance.play(Assets.instance.sounds.jump);
 			body.setLinearVelocity(body.getLinearVelocity().x, terminalVelocity.y);
 			jumpState = JUMP_STATE.JUMP;
 			stillJumping = true;
@@ -99,6 +104,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		}
 		// double jump
 		if (!stillJumping && jumpKeyPressed && doubleJump) {
+			AudioManager.instance.play(Assets.instance.sounds.jump);
 			body.setLinearVelocity(body.getLinearVelocity().x, terminalVelocity.y);
 			setDoubleJumpUpgrade(false);
 		}
@@ -112,16 +118,17 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		// render the jetpack if jeb has it before jeb
 		if (jetpackUpgrade) {
 			reg = jetpack;
+			particle.draw(batch);
 			batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
 					scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
-					false, false);
+					viewDirection, false);
 		}
 
 		// set the region to jeb
 		reg = regPlayer;
 		batch.draw(reg.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, scale.x,
 				scale.y, rotation, reg.getRegionX(), reg.getRegionY(), reg.getRegionWidth(), reg.getRegionHeight(),
-				viewDirection == VIEW_DIRECTION.LEFT, false);
+				viewDirection, false);
 	}
 
 	public void setSlowUpgrade(boolean pickedUp) {
@@ -132,8 +139,10 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 
 	public void setJetpackUpgrade(boolean pickedUp) {
 		jetpackUpgrade = pickedUp;
-		if (pickedUp)
+		if (pickedUp) {
+			AudioManager.instance.play(Assets.instance.sounds.jetpack);
 			jetpackTimeLeft = Constants.JETPACK_DURATION;
+		}
 	}
 
 	public void setDoubleJumpUpgrade(boolean pickedUp) {
@@ -158,16 +167,60 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		}
 		// update jetpack time
 		if (jetpackTimeLeft > 0) {
+			// move particles to correct position
+			if(viewDirection) 
+				particle.setPosition(body.getPosition().x+bounds.width-0.1f, body.getPosition().y+0.1f);
+			else
+				particle.setPosition(body.getPosition().x+0.1f, body.getPosition().y+0.1f);
+			particle.update(deltaTime);
 			jetpackTimeLeft -= deltaTime;
 			// disable to power up
 			if (jetpackTimeLeft < 0) {
 				jetpackTimeLeft = 0;
 				setJetpackUpgrade(false);
+				particle.allowCompletion();
 			}
 		}
 		// get the highest point reached to be used as the score
 		if (maxHeight < (int) (position.y + .585f)) {
 			maxHeight = (int) (position.y + .585f);
+		}
+
+		// set correct image/animation
+		regPlayer = setRegion();
+	}
+
+	private TextureRegion setRegion() {
+		// idle
+		if (body.getLinearVelocity().x == 0 && body.getLinearVelocity().y == 0) {
+			stateTime = 0;
+			return Assets.instance.player.idle;
+		}
+		// running
+		else if (body.getLinearVelocity().x != 0 && body.getLinearVelocity().y == 0) {
+			if (body.getLinearVelocity().x > 0)
+				viewDirection = false;
+			else
+				viewDirection = true;
+			return (TextureRegion) Assets.instance.player.running.getKeyFrame(stateTime++, true);
+		}
+		// jumping up
+		else if (body.getLinearVelocity().y > 0) {
+			if (body.getLinearVelocity().x > 0)
+				viewDirection = false;
+			else
+				viewDirection = true;
+			stateTime = 0;
+			return Assets.instance.player.up;
+		}
+		// down
+		else {
+			if (body.getLinearVelocity().x > 0)
+				viewDirection = false;
+			else
+				viewDirection = true;
+			stateTime = 0;
+			return Assets.instance.player.down;
 		}
 	}
 
@@ -180,7 +233,7 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		Fixture a = contact.getFixtureA();
 		// jeb
 		Fixture b = contact.getFixtureB();
-		
+
 		// it is a platform
 		if (!a.isSensor()) {
 			// check if jeb is standing on top of a platform
@@ -196,23 +249,21 @@ public class Jeb extends AbstractGameObject implements ContactListener {
 		}
 		// contatcs a upgrade
 		else {
-			if(a.getBody().getUserData().getClass() == SlowDownUpgrade.class) {
+			if (a.getBody().getUserData().getClass() == SlowDownUpgrade.class) {
 				SlowDownUpgrade upg = (SlowDownUpgrade) a.getBody().getUserData();
-				if(!upg.collected) {
+				if (!upg.collected) {
 					upg.collected = true;
 					setSlowUpgrade(true);
 				}
-			}
-			else if (a.getBody().getUserData().getClass() == JetpackUpgrade.class) {
+			} else if (a.getBody().getUserData().getClass() == JetpackUpgrade.class) {
 				JetpackUpgrade upg = (JetpackUpgrade) a.getBody().getUserData();
-				if(!upg.collected) {
+				if (!upg.collected) {
 					upg.collected = true;
 					setJetpackUpgrade(true);
 				}
-			}
-			else if (a.getBody().getUserData().getClass() == DoubleJumpUpgrade.class) {
+			} else if (a.getBody().getUserData().getClass() == DoubleJumpUpgrade.class) {
 				DoubleJumpUpgrade upg = (DoubleJumpUpgrade) a.getBody().getUserData();
-				if(!upg.collected) {
+				if (!upg.collected) {
 					upg.collected = true;
 					setDoubleJumpUpgrade(true);
 				}

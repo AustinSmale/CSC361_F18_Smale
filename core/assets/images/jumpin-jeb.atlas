@@ -6,70 +6,126 @@ filter: Nearest,Nearest
 repeat: none
 Cloud1
   rotate: false
-  xy: 516, 712
+  xy: 516, 814
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 Cloud2
   rotate: false
-  xy: 2, 132
+  xy: 2, 234
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 GrassMidSpring
   rotate: false
-  xy: 516, 582
+  xy: 516, 684
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 Hills1
   rotate: false
-  xy: 2, 552
+  xy: 2, 654
   size: 512, 288
   orig: 512, 288
   offset: 0, 0
   index: -1
 Hills2
   rotate: false
-  xy: 2, 262
+  xy: 2, 364
   size: 512, 288
   orig: 512, 288
   offset: 0, 0
   index: -1
 double
   rotate: false
-  xy: 646, 712
+  xy: 646, 814
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
 jetpack
   rotate: false
-  xy: 516, 480
+  xy: 516, 582
   size: 100, 100
   orig: 100, 100
   offset: 0, 0
   index: -1
 jetpackPower
   rotate: false
-  xy: 2, 2
+  xy: 2, 104
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-player
+jump-down
   rotate: false
-  xy: 646, 610
+  xy: 646, 712
   size: 100, 100
   orig: 100, 100
   offset: 0, 0
   index: -1
-slow
+jump-up
+  rotate: false
+  xy: 776, 842
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: -1
+player
+  rotate: false
+  xy: 2, 2
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: -1
+run_anm
   rotate: false
   xy: 132, 132
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: 1
+run_anm
+  rotate: false
+  xy: 262, 262
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: 2
+run_anm
+  rotate: false
+  xy: 516, 480
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: 3
+run_anm
+  rotate: false
+  xy: 878, 842
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: 4
+run_anm
+  rotate: false
+  xy: 364, 262
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: 5
+run_anm
+  rotate: false
+  xy: 516, 378
+  size: 100, 100
+  orig: 100, 100
+  offset: 0, 0
+  index: 6
+slow
+  rotate: false
+  xy: 132, 234
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
